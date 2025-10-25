@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="radix_pulse API docs, for the Dart programming language.">
+  <title>radix_pulse - Dart API docs</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="static-assets/github.css?v1">
+  <link rel="stylesheet" href="static-assets/styles.css?v1">
+  <link rel="icon" href="static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li class="self-crumb">radix_pulse package</li>
+  </ol>
+  <div class="self-name">radix_pulse</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div id="dartdoc-main-content" class="main-content">
+      
+<section class="desc markdown">
+  <h1 id="radix-pulse">Radix Pulse</h1>
+<p><a href="https://pub.dev/packages/radix_pulse"><img src="https://img.shields.io/pub/v/radix_pulse.svg" alt="pub version"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a></p>
+<p>A high-performance, in-place Radix Sort implementation for Dart and Flutter.</p>
+<p>Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than <code>List.sort()</code> for specific data types, especially large lists of numbers.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>High-Performance Sorting</strong>: Optimized for speed using low-level byte operations.</li>
+<li><strong>Unified Integer API</strong>: Sort <code>List&lt;int&gt;</code> with a single function, <code>radixSortInt</code>, for both signed and unsigned integers.</li>
+<li><strong>Floating-Point Support</strong>: Sort <code>List&lt;double&gt;</code> with <code>radixSortDouble</code>, correctly handling positive/negative values, infinities, and zero.</li>
+<li><strong>Parallel Sorting</strong>: <code>radixSortParallelUnsigned</code> leverages multiple CPU cores using Isolates to sort very large lists even faster.</li>
+<li><strong>Memory Efficient</strong>: Includes options for buffer reuse to minimize GC pressure on frequent sorting tasks.</li>
+<li><strong>Stable Sort</strong>: Preserves the relative order of equal elements.</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="installation">Installation</h3>
+<p>Add this to your package's <code>pubspec.yaml</code> file:</p>
+<pre class="language-yaml"><code class="language-yaml">dependencies:
+  radix_pulse: ^1.0.0 # Replace with the latest version
+</code></pre>
+<p>Then, run <code>dart pub get</code> or <code>flutter pub get</code>.</p>
+<h2 id="usage">Usage</h2>
+<p>Import the library:</p>
+<pre class="language-dart"><code class="language-dart">import 'package:radix_pulse/radix_pulse.dart';
+</code></pre>
+<h3 id="sorting-integers">Sorting Integers</h3>
+<p>Use <code>radixSortInt</code> for both signed and unsigned integer lists.</p>
+<pre class="language-dart"><code class="language-dart">// Sort a list of signed integers
+final signedNumbers = [40, -1, 900, -10, 0, 5];
+radixSortInt(signedNumbers, signed: true);
+print(signedNumbers); // [-10, -1, 0, 5, 40, 900]
+
+// Sort a list of unsigned integers
+final unsignedNumbers = [40, 1, 900, 10, 5];
+radixSortInt(unsignedNumbers, signed: false);
+print(unsignedNumbers); // [1, 5, 10, 40, 900]
+</code></pre>
+<h3 id="sorting-doubles">Sorting Doubles</h3>
+<p>Use <code>radixSortDouble</code> for <code>List&lt;double&gt;</code>.</p>
+<pre class="language-dart"><code class="language-dart">final doubleNumbers = [10.5, -1.2, 900.0, -10.0, 0.0];
+radixSortDouble(doubleNumbers);
+print(doubleNumbers); // [-10.0, -1.2, 0.0, 10.5, 900.0]
+</code></pre>
+<h3 id="parallel-sorting">Parallel Sorting</h3>
+<p>For very large lists, you can use <code>radixSortParallelUnsigned</code> to speed up sorting by using multiple isolates.</p>
+<pre class="language-dart"><code class="language-dart">// A large list of numbers
+final largeList = List.generate(100000, (i) =&gt; 99999 - i);
+
+// Sort it in parallel across 4 threads
+await radixSortParallelUnsigned(largeList, threads: 4);
+
+print(largeList.first); // 0
+print(largeList.last); // 99999
+</code></pre>
+<h2 id="performance">Performance</h2>
+<p>Radix sort is not always faster than the default <code>List.sort()</code> (which uses IntroSort). It excels with large lists of numbers (integers or floats).</p>
+<p><strong>Baseline Benchmark (100,000 random 31-bit integers):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>Average Runtime (µs)</th>
+<th>Factor vs. List.sort()</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td>87,165</td>
+<td>1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortInt (unsigned)</code></td>
+<td>16,742</td>
+<td>~5.2x faster</td>
+</tr>
+</tbody>
+</table>
+<p><em>Lower is better. Your results may vary.</em></p>
+<h2 id="additional-information">Additional Information</h2>
+<p>This package is under active development. For more details, please see the <a href="https://pub.dev/documentation/radix_pulse/latest/">API documentation</a>.</p>
+<p>To file issues or contribute to the package, please visit the <a href="https://github.com/your_org/radix_pulse">GitHub repository</a>.</p>
+</section>
+
+
+      <section class="summary">
+          <h2>Libraries</h2>
+        <dl>
+          <dt id="radix_pulse">
+  <span class="name"><a href="radix_pulse/">radix_pulse</a></span> 
+
+</dt>
+<dd>Support for doing something awesome.
+</dd>
+
+        </dl>
+      </section>
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li class="self-crumb">radix_pulse package</li>
+</ol>
+
+    <h5 class="hidden-xs"><span class="package-name">radix_pulse</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="radix_pulse/">radix_pulse</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+</main>
+<footer>
+  <span class="no-break">
+    radix_pulse
+      1.0.0
+  </span>
+  
+</footer>
+
+
+<script src="static-assets/highlight.pack.js?v1"></script>
+<script src="static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
