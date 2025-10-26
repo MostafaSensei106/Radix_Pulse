@@ -63,12 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Sorts a list of BigInts in place using Radix Sort.</p>
-<p>This implementation handles both positive and negative BigInts.
-It works by separating negative and positive numbers, sorting each group
-using an LSB-first radix sort approach, and then combining them.</p>
-<p>Note: This is a simplified implementation for demonstration and may not be as
-performant as the integer and double sorters for very large numbers.</p>
+  <p>Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.</p>
 </section>
 
 
@@ -76,24 +71,44 @@ performant as the integer and double sorters for very large numbers.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void radixSortBigInt(List&lt;BigInt&gt; data) {
-  if (data.length &lt; 2) {
+  final len = data.length;
+  if (len &lt; 2) {
     return;
   }
 
-  final negatives = data.where((n) =&gt; n.isNegative).toList();
-  final positives = data.where((n) =&gt; !n.isNegative).toList();
+  &#47;&#47; Fast path escape hatch: If all numbers fit in a 64-bit signed integer,
+  &#47;&#47; use the much faster integer-specific radix sort.
+  bool canUseIntSort = true;
+  for (final n in data) {
+    if (!n.isValidInt) {
+      canUseIntSort = false;
+      break;
+    }
+  }
 
-  &#47;&#47; Sort positive numbers ascending
-  _radixSortPositiveBigInt(positives);
+  if (canUseIntSort) {
+    final intList = data.map((e) =&gt; e.toInt()).toList();
+    radixSortInt(intList, signed: true);
+    for (var i = 0; i &lt; len; i++) {
+      data[i] = BigInt.from(intList[i]);
+    }
+    return;
+  }
 
-  &#47;&#47; Sort negative numbers by their absolute value, then reverse to get descending
-  _radixSortPositiveBigInt(negatives, sortByAbsolute: true);
-  negatives.setAll(0, negatives.reversed);
+  &#47;&#47; 1. Partition the list in-place into negative and positive sections.
+  int positiveStart = _partitionInPlace(data);
 
-  &#47;&#47; Combine the sorted lists
-  data.clear();
-  data.addAll(negatives);
-  data.addAll(positives);
+  &#47;&#47; 2. Sort the negative part (if it exists).
+  if (positiveStart &gt; 0) {
+    &#47;&#47; Sort negatives by absolute value, then reverse the sorted slice.
+    _radixSortPositiveBigInt(data, 0, positiveStart, sortByAbsolute: true);
+    _reverse(data, 0, positiveStart);
+  }
+
+  &#47;&#47; 3. Sort the positive part (if it exists).
+  if (positiveStart &lt; len) {
+    _radixSortPositiveBigInt(data, positiveStart, len);
+  }
 }</code></pre>
 </section>
 

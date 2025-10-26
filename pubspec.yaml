@@ -1,7 +1,8 @@
 name: radix_pulse
-description: A starting point for Dart libraries or applications.
+description: A high-performance, in-place Radix Sort implementation for Dart and Flutter, providing significant speed improvements over standard sorting for number lists.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/your_org/radix_pulse
+homepage: https://github.com/your_org/radix_pulse
 
 environment:
   sdk: ^3.9.2

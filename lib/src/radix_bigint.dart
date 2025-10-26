@@ -1,76 +1,178 @@
-import 'dart:collection';
+import 'dart:typed_data';
 
-/// Sorts a list of BigInts in place using Radix Sort.
-///
-/// This implementation handles both positive and negative BigInts.
-/// It works by separating negative and positive numbers, sorting each group
-/// using an LSB-first radix sort approach, and then combining them.
-///
-/// Note: This is a simplified implementation for demonstration and may not be as
-/// performant as the integer and double sorters for very large numbers.
+import 'radix_int.dart';
+
+const int _INSERTION_SORT_THRESHOLD_BIGINT = 32;
+
+/// Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.
 void radixSortBigInt(List<BigInt> data) {
-  if (data.length < 2) {
+  final len = data.length;
+  if (len < 2) {
     return;
   }
-  print('Initial data: $data');
 
-  final negatives = data.where((n) => n.isNegative).toList();
-  final positives = data.where((n) => !n.isNegative).toList();
-  print('Split negatives: $negatives');
-  print('Split positives: $positives');
+  // Fast path escape hatch: If all numbers fit in a 64-bit signed integer,
+  // use the much faster integer-specific radix sort.
+  bool canUseIntSort = true;
+  for (final n in data) {
+    if (!n.isValidInt) {
+      canUseIntSort = false;
+      break;
+    }
+  }
 
-  // Sort positive numbers ascending
-  _radixSortPositiveBigInt(positives);
-  print('Sorted positives: $positives');
+  if (canUseIntSort) {
+    final intList = data.map((e) => e.toInt()).toList();
+    radixSortInt(intList, signed: true);
+    for (var i = 0; i < len; i++) {
+      data[i] = BigInt.from(intList[i]);
+    }
+    return;
+  }
 
-  // Sort negative numbers by their absolute value, then reverse to get descending
-  _radixSortPositiveBigInt(negatives, sortByAbsolute: true);
-  print('Sorted negatives (by abs): $negatives');
-  negatives.setAll(0, negatives.reversed);
-  print('Reversed negatives: $negatives');
+  // 1. Partition the list in-place into negative and positive sections.
+  int positiveStart = _partitionInPlace(data);
 
-  // Combine the sorted lists
-  data.clear();
-  data.addAll(negatives);
-  data.addAll(positives);
-  print('Final combined data: $data');
+  // 2. Sort the negative part (if it exists).
+  if (positiveStart > 0) {
+    // Sort negatives by absolute value, then reverse the sorted slice.
+    _radixSortPositiveBigInt(data, 0, positiveStart, sortByAbsolute: true);
+    _reverse(data, 0, positiveStart);
+  }
+
+  // 3. Sort the positive part (if it exists).
+  if (positiveStart < len) {
+    _radixSortPositiveBigInt(data, positiveStart, len);
+  }
 }
 
-void _radixSortPositiveBigInt(List<BigInt> list, {bool sortByAbsolute = false}) {
-  if (list.length < 2) {
+/// Partitions the list in-place, moving all negative numbers to the beginning.
+/// Returns the index of the first positive number.
+int _partitionInPlace(List<BigInt> data) {
+  int left = 0;
+  int right = data.length - 1;
+  while (left <= right) {
+    if (data[left].isNegative) {
+      left++;
+    } else {
+      // Swap positive number at [left] with number at [right]
+      final temp = data[left];
+      data[left] = data[right];
+      data[right] = temp;
+      right--;
+    }
+  }
+  return left;
+}
+
+/// Reverses a sublist in place.
+void _reverse(List<BigInt> list, int start, int end) {
+  int i = start;
+  int j = end - 1;
+  while (i < j) {
+    final temp = list[i];
+    list[i] = list[j];
+    list[j] = temp;
+    i++;
+    j--;
+  }
+}
+
+/// Hybrid Radix/Insertion sort for non-negative BigInts using a 16-bit radix.
+void _radixSortPositiveBigInt(
+  List<BigInt> list,
+  int start,
+  int end, {
+  bool sortByAbsolute = false,
+}) {
+  final len = end - start;
+  if (len < 2) {
     return;
   }
 
-  // Find the max bit length to determine the number of passes
+  // Hybrid approach: Use insertion sort for small lists.
+  if (len < _INSERTION_SORT_THRESHOLD_BIGINT) {
+    _insertionSort(list, start, end, sortByAbsolute: sortByAbsolute);
+    return;
+  }
+
+  // Find the max bit length to determine the number of passes.
   var maxBitLength = 0;
-  for (final n in list) {
+  for (var i = start; i < end; i++) {
+    final n = list[i];
     final bitLength = (sortByAbsolute ? n.abs() : n).bitLength;
     if (bitLength > maxBitLength) {
       maxBitLength = bitLength;
     }
   }
 
-  final maxBytes = (maxBitLength / 8).ceil();
+  const bitsPerPass = 16;
+  const radixSize = 1 << bitsPerPass;
+  const mask = radixSize - 1;
+  final passes = (maxBitLength / bitsPerPass).ceil();
 
-  // Radix sort, byte by byte
-  for (var pass = 0; pass < maxBytes; pass++) {
-    final shift = pass * 8;
-    // Create 256 buckets for each possible byte value
-    final buckets = List.generate(256, (_) => Queue<BigInt>());
+  var currentList = list;
+  var otherList = List<BigInt>.filled(len, BigInt.zero);
+  final count = Uint32List(radixSize);
 
-    // Iterate over a copy of the list to avoid modification issues
-    for (final n in List.of(list)) {
+  for (var pass = 0; pass < passes; ++pass) {
+    final shift = pass * bitsPerPass;
+    count.fillRange(0, radixSize, 0);
+
+    for (var i = 0; i < len; i++) {
+      final n = currentList == list ? currentList[start + i] : currentList[i];
       final value = sortByAbsolute ? n.abs() : n;
-      final bucketIndex = (value >> shift).toUnsigned(8).toInt();
-      buckets[bucketIndex].add(n);
+      final bucket = (value >> shift).toUnsigned(mask).toInt();
+      count[bucket]++;
     }
 
-    // Re-collect from buckets into the original list
-    var i = 0;
-    for (final bucket in buckets) {
-      while (bucket.isNotEmpty) {
-        list[i++] = bucket.removeFirst();
+    for (var i = 1; i < radixSize; ++i) {
+      count[i] += count[i - 1];
+    }
+
+    for (var i = len - 1; i >= 0; --i) {
+      final n = currentList == list ? currentList[start + i] : currentList[i];
+      final value = sortByAbsolute ? n.abs() : n;
+      final bucket = (value >> shift).toUnsigned(mask).toInt();
+      otherList[--count[bucket]] = n;
+    }
+
+    final tempList = currentList;
+    currentList = otherList;
+    // After the first pass, otherList becomes the primary buffer.
+    if (tempList == list) {
+      otherList = List<BigInt>.filled(len, BigInt.zero);
+    } else {
+      otherList = tempList;
+    }
+  }
+
+  if (currentList != list) {
+    list.setAll(start, currentList);
+  }
+}
+
+/// Simple Insertion Sort for small sublists.
+void _insertionSort(
+  List<BigInt> list,
+  int start,
+  int end, {
+  required bool sortByAbsolute,
+}) {
+  for (var i = start + 1; i < end; i++) {
+    final key = list[i];
+    var j = i - 1;
+    final keyVal = sortByAbsolute ? key.abs() : key;
+
+    while (j >= start) {
+      final currentVal = sortByAbsolute ? list[j].abs() : list[j];
+      if (currentVal.compareTo(keyVal) > 0) {
+        list[j + 1] = list[j];
+        j--;
+      } else {
+        break;
       }
     }
+    list[j + 1] = key;
   }
 }
