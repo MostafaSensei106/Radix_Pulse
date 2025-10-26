@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'radix_int.dart';
 
+// ignore: constant_identifier_names
 const int _INSERTION_SORT_THRESHOLD_BIGINT = 32;
 
 /// Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.
