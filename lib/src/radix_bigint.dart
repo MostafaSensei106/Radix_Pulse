@@ -327,7 +327,7 @@ void _radixSortPositiveBigIntWithKnownMax(
   bool sortByAbsolute = false,
 }) {
   final len = end - start;
-  if (len < _INSERTION_SORT_THRESHOLD_BIGINT) {
+  if (len < _insertionSortThresholdBigint) {
     _insertionSort(list, start, end, sortByAbsolute: sortByAbsolute);
     return;
   }
