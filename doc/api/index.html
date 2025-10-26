@@ -157,7 +157,7 @@ print(largeList.last); // 999999
 <hr>
 <h2 id="-blazing-fast-performance">🚀 Blazing Fast Performance</h2>
 <p>Performance is the core feature of Radix Pulse. Our algorithms are consistently faster than the standard <code>List.sort()</code> for large numerical datasets, often by a significant margin.</p>
-<p>Here are the results from our benchmarks, running on a standard development machine with a list of <strong>1,000,000 random elements</strong>:</p>
+<p>To ensure accuracy, the results below are the <strong>average of 10 separate benchmark runs</strong> on a standard development machine, each sorting a list of <strong>1,000,000 random elements</strong>.</p>
 <h3 id="sorting-listint-32-bit-signed-integers">Sorting <code>List&lt;int&gt;</code> (32-bit Signed Integers)</h3>
 <table>
 <thead>
@@ -170,13 +170,13 @@ print(largeList.last); // 999999
 <tbody>
 <tr>
 <td><code>List.sort()</code></td>
-<td>~1020</td>
+<td>~1071</td>
 <td>1.0x</td>
 </tr>
 <tr>
 <td><strong><code>radixSortInt</code></strong></td>
-<td><strong>~281</strong></td>
-<td><strong>~3.6x faster</strong></td>
+<td><strong>~312</strong></td>
+<td><strong>~3.4x faster</strong></td>
 </tr>
 </tbody>
 </table>
@@ -192,13 +192,13 @@ print(largeList.last); // 999999
 <tbody>
 <tr>
 <td><code>List.sort()</code></td>
-<td>~4083</td>
+<td>~3623</td>
 <td>1.0x</td>
 </tr>
 <tr>
 <td><strong><code>radixSortDouble</code></strong></td>
-<td><strong>~776</strong></td>
-<td><strong>~5.3x faster</strong></td>
+<td><strong>~916</strong></td>
+<td><strong>~4.0x faster</strong></td>
 </tr>
 </tbody>
 </table>
@@ -214,18 +214,18 @@ print(largeList.last); // 999999
 <tbody>
 <tr>
 <td><code>List.sort()</code></td>
-<td>~8666</td>
+<td>~9579</td>
 <td>1.0x</td>
 </tr>
 <tr>
 <td><strong><code>radixSortBigInt</code></strong></td>
-<td><strong>~1481</strong></td>
-<td><strong>~5.8x faster</strong></td>
+<td><strong>~1621</strong></td>
+<td><strong>~5.9x faster</strong></td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><em>Your results may vary based on hardware, data distribution, and list size. To run the benchmarks yourself, see the <a href="./benchmark/results.md">benchmark/results.md</a> file.</em></p>
+<p><em>Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the <a href="./benchmark/results.md">benchmark/results.md</a> file.</em></p>
 <hr>
 <h2 id="technologies">Technologies</h2>
 <table>
@@ -287,7 +287,7 @@ Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei1
   <span class="name"><a href="radix_pulse/">radix_pulse</a></span> 
 
 </dt>
-<dd>Support for doing something awesome.
+<dd>radix_pulse
 </dd>
 
         </dl>
@@ -317,7 +317,7 @@ Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei1
 <footer>
   <span class="no-break">
     radix_pulse
-      1.0.0
+      1.0.2
   </span>
   
 </footer>

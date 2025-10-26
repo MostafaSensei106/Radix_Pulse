@@ -63,14 +63,6 @@
 
     </section>
     
-<section class="desc markdown">
-  <p>Sorts a list of signed integers in parallel using Radix Sort.</p>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final numbers = [-500, 300, -100, 900, 0];
-await radixSortParallelSigned(numbers);
-print(numbers); // [-500, -100, 0, 300, 900]
-</code></pre>
-</section>
 
 
     
@@ -80,7 +72,6 @@ print(numbers); // [-500, -100, 0, 300, 900]
   final len = data.length;
   if (len &lt; 2) return;
 
-  &#47;&#47; Convert to unsigned representation
   final list = Int32List.fromList(data);
   final unsignedView = Uint32List.view(list.buffer);
 
@@ -89,18 +80,12 @@ print(numbers); // [-500, -100, 0, 300, 900]
     unsignedView[i] ^= signMask;
   }
 
-  &#47;&#47; Convert to regular list for parallel sort
-  final tempData = List&lt;int&gt;.generate(len, (i) =&gt; unsignedView[i]);
+  radixSortCore(unsignedView);
 
-  &#47;&#47; Sort using parallel algorithm
-  await radixSortParallelUnsigned(tempData, threads: threads);
-
-  &#47;&#47; Convert back
   for (var i = 0; i &lt; len; i++) {
-    unsignedView[i] = tempData[i] ^ signMask;
+    unsignedView[i] ^= signMask;
   }
 
-  &#47;&#47; Copy back to original
   for (var i = 0; i &lt; len; i++) {
     data[i] = list[i];
   }
@@ -131,7 +116,7 @@ print(numbers); // [-500, -100, 0, 300, 900]
 <footer>
   <span class="no-break">
     radix_pulse
-      1.0.0
+      1.0.2
   </span>
   
 </footer>

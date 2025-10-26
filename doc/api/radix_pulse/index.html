@@ -60,8 +60,77 @@
 
     
 <section class="desc markdown">
-  <p>Support for doing something awesome.</p>
-<p>More dartdocs go here.</p>
+  <h1 id="radix_pulse">radix_pulse</h1>
+<p>⚡ A high-performance, parallelized Radix Sort library for Dart.</p>
+<p><code>radix_pulse</code> brings <strong>native-like speed</strong> to Dart’s sorting world.
+It’s designed for developers who need <em>maximum performance</em>, <em>low GC pressure</em>,
+and <em>fine-grained control</em> over memory and threading.</p>
+<h2 id="-core-highlights">🚀 Core Highlights</h2>
+<ul>
+<li><strong>Multi-Type Sorting:</strong> Supports <code>List&lt;int&gt;</code>, <code>List&lt;double&gt;</code>, and <code>List&lt;BigInt&gt;</code>.</li>
+<li><strong>Stable &amp; Accurate:</strong> Preserves order of equal elements and correctly handles
+signed values, ±0, ±∞, and NaN.</li>
+<li><strong>TypedData Optimized:</strong> Works directly with <code>Int32List</code>, <code>Uint32List</code>,
+and <code>Float64List</code> for zero-copy performance.</li>
+<li><strong>Parallel Execution:</strong> Leverages Isolates for large-scale data sorting.</li>
+<li><strong>Adaptive Hybrid Logic:</strong> Automatically switches to insertion sort for
+small segments to minimize overhead.</li>
+</ul>
+<h2 id="-advanced-capabilities">🧠 Advanced Capabilities</h2>
+<ul>
+<li><strong>Buffer Pooling:</strong> Reuse pre-allocated buffers to reduce GC overhead.</li>
+<li><strong>Range Optimization:</strong> Specialized <code>BigInt</code> routines with <code>maxBitLength</code> hints.</li>
+<li><strong>Custom Merge Strategies:</strong> Control parallel merge behavior for massive datasets.</li>
+<li><strong>Performance Estimation:</strong> Benchmark potential speedups with
+<code>estimateParallelPerformance()</code>.</li>
+</ul>
+<h2 id="-api-overview">🧰 API Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>radixSortInt()</code></td>
+<td>Sorts any <code>List&lt;int&gt;</code> (signed/unsigned).</td>
+</tr>
+<tr>
+<td><code>radixSortDouble()</code></td>
+<td>Stable sort for doubles (handles ±∞, NaN).</td>
+</tr>
+<tr>
+<td><code>radixSortBigInt()</code></td>
+<td>Hybrid Radix Sort for arbitrary precision integers.</td>
+</tr>
+<tr>
+<td><code>radixSortFloat64()</code></td>
+<td>Zero-copy sorting for <code>Float64List</code>.</td>
+</tr>
+<tr>
+<td><code>radixSortParallelUnsigned()</code></td>
+<td>Multi-core sorting for large unsigned integer lists.</td>
+</tr>
+<tr>
+<td><code>clearBufferPools()</code></td>
+<td>Frees all global buffer pools to release memory.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="-example">⚙️ Example</h2>
+<pre class="language-dart"><code class="language-dart">import 'package:radix_pulse/radix_pulse.dart';
+
+void main() {
+  final data = List.generate(1000000, (i) =&gt; 1000000 - i);
+
+  // High-performance parallel radix sort
+  await radixSortParallelUnsigned(data);
+
+  print(data.take(10));
+}
+</code></pre>
 </section>
 
 
@@ -84,19 +153,6 @@
 </dt>
 <dd>
   A top-level function to clear all global buffer pools.
-  
-
-</dd>
-
-          <dt id="estimateParallelPerformance" class="callable">
-  <span class="name"><a href="../radix_pulse/estimateParallelPerformance.html">estimateParallelPerformance</a></span><span class="signature">(<wbr><span class="parameter" id="estimateParallelPerformance-param-dataSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">dataSize</span>, {</span><span class="parameter" id="estimateParallelPerformance-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">threads</span> = <span class="default-value">4</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Estimates the speedup from parallel sorting.
   
 
 </dd>
@@ -192,19 +248,6 @@
 
 </dd>
 
-          <dt id="radixSortParallelAdvanced" class="callable">
-  <span class="name"><a href="../radix_pulse/radixSortParallelAdvanced.html">radixSortParallelAdvanced</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelAdvanced-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelAdvanced-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span>, </span><span class="parameter" id="radixSortParallelAdvanced-param-signed"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">signed</span> = <span class="default-value">false</span>, </span><span class="parameter" id="radixSortParallelAdvanced-param-minChunkSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">minChunkSize</span> = <span class="default-value">8192</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Advanced parallel sort with custom merge strategy.
-  
-
-</dd>
-
           <dt id="radixSortParallelSigned" class="callable">
   <span class="name"><a href="../radix_pulse/radixSortParallelSigned.html">radixSortParallelSigned</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelSigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelSigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -213,7 +256,7 @@
 
 </dt>
 <dd>
-  Sorts a list of signed integers in parallel using Radix Sort.
+  
   
 
 </dd>
@@ -226,7 +269,7 @@
 
 </dt>
 <dd>
-  Sorts a list of non-negative integers in parallel using Radix Sort.
+  
   
 
 </dd>
@@ -275,7 +318,7 @@
 <footer>
   <span class="no-break">
     radix_pulse
-      1.0.0
+      1.0.2
   </span>
   
 </footer>

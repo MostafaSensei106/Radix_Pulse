@@ -63,117 +63,17 @@
 
     </section>
     
-<section class="desc markdown">
-  <p>Sorts a list of non-negative integers in parallel using Radix Sort.</p>
-<p>This function divides the list into chunks and sorts each chunk in a separate
-isolate, leveraging multiple CPU cores. The sorted chunks are then merged
-back together using an optimized k-way merge algorithm.</p>
-<p><strong>Major optimizations:</strong></p>
-<ul>
-<li>Efficient k-way merge using a min-heap for O(n log k) complexity</li>
-<li>Adaptive chunk sizing based on data size and available cores</li>
-<li>Zero-copy views for isolate communication</li>
-<li>Automatic thread count detection based on platform</li>
-<li>Pre-allocated merge buffer to reduce GC pressure</li>
-<li>Early fallback for small datasets</li>
-</ul>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final numbers = List.generate(1000000, (i) =&gt; 999999 - i);
-await radixSortParallelUnsigned(numbers);
-print(numbers.first); // 0
-print(numbers.last); // 999999
-</code></pre>
-<ul>
-<li><code>data</code>: The list of non-negative integers to be sorted.</li>
-<li><code>threads</code>: The number of parallel isolates to use. If null, automatically
-detects the optimal number based on data size. Minimum is 2, maximum is 16.</li>
-</ul>
-</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; radixSortParallelUnsigned(List&lt;int&gt; data, {int? threads}) async {
-  final len = data.length;
-
-  &#47;&#47; Determine optimal thread count
-  final optimalThreads = threads ?? _calculateOptimalThreads(len);
-
-  &#47;&#47; Early fallback for small lists or single-threaded request
-  if (len &lt; 8192 || optimalThreads &lt;= 1) {
-    final list = Uint32List.fromList(data);
-    radixSortCore(list);
-    for (var i = 0; i &lt; len; i++) {
-      data[i] = list[i];
-    }
-    return;
+  final list = Uint32List.fromList(data);
+  radixSortCore(list);
+  for (var i = 0; i &lt; data.length; i++) {
+    data[i] = list[i];
   }
-
-  final receivePort = ReceivePort();
-  final originalList = Uint32List.fromList(data);
-
-  &#47;&#47; Calculate chunk size with better load balancing
-  final numThreads = optimalThreads.clamp(2, 16);
-  final chunkSize = (len &#47; numThreads).ceil();
-
-  &#47;&#47; Track spawned isolates
-  final isolates = &lt;Isolate&gt;[];
-  var chunksSpawned = 0;
-
-  &#47;&#47; Spawn isolates
-  for (var i = 0; i &lt; numThreads; i++) {
-    final start = i * chunkSize;
-    if (start &gt;= len) break;
-
-    final end = min(start + chunkSize, len);
-    final request = _IsolateSortRequest(
-      receivePort.sendPort,
-      originalList,
-      start,
-      end,
-      i, &#47;&#47; Chunk ID for maintaining order
-    );
-
-    try {
-      final isolate = await Isolate.spawn(_isolateSortEntrypoint, request);
-      isolates.add(isolate);
-      chunksSpawned++;
-    } catch (e) {
-      &#47;&#47; If we fail to spawn an isolate, fall back to serial sort
-      receivePort.close();
-      for (final iso in isolates) {
-        iso.kill(priority: Isolate.immediate);
-      }
-
-      final list = Uint32List.fromList(data);
-      radixSortCore(list);
-      for (var i = 0; i &lt; len; i++) {
-        data[i] = list[i];
-      }
-      return;
-    }
-  }
-
-  &#47;&#47; Collect sorted chunks
-  final sortedChunks = &lt;_IsolateSortResponse&gt;[];
-
-  await for (final message in receivePort.take(chunksSpawned)) {
-    sortedChunks.add(message as _IsolateSortResponse);
-  }
-
-  receivePort.close();
-
-  &#47;&#47; Kill all isolates
-  for (final isolate in isolates) {
-    isolate.kill(priority: Isolate.immediate);
-  }
-
-  &#47;&#47; Sort chunks by ID to maintain order
-  sortedChunks.sort((a, b) =&gt; a.chunkId.compareTo(b.chunkId));
-
-  &#47;&#47; K-way merge using min-heap for optimal performance
-  _kWayMergeOptimized(data, sortedChunks.map((r) =&gt; r.sortedChunk).toList());
 }</code></pre>
 </section>
 
@@ -201,7 +101,7 @@ detects the optimal number based on data size. Minimum is 2, maximum is 16.</li>
 <footer>
   <span class="no-break">
     radix_pulse
-      1.0.0
+      1.0.2
   </span>
   
 </footer>
