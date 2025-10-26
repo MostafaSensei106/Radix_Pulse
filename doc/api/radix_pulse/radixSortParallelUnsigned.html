@@ -56,7 +56,7 @@
         
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">radixSortParallelUnsigned</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortParallelUnsigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
-<li><span class="parameter" id="radixSortParallelUnsigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">threads</span> = <span class="default-value">4</span>, </span></li>
+<li><span class="parameter" id="radixSortParallelUnsigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span>, </span></li>
 </ol>})
 
         
@@ -67,21 +67,26 @@
   <p>Sorts a list of non-negative integers in parallel using Radix Sort.</p>
 <p>This function divides the list into chunks and sorts each chunk in a separate
 isolate, leveraging multiple CPU cores. The sorted chunks are then merged
-back together in the main isolate.</p>
-<p>For small lists (currently less than 4096 items) or if <code>threads</code> is 1,
-this function will fall back to the single-threaded <code>radixSortUnsigned</code>
-to avoid the overhead of isolate management.</p>
+back together using an optimized k-way merge algorithm.</p>
+<p><strong>Major optimizations:</strong></p>
+<ul>
+<li>Efficient k-way merge using a min-heap for O(n log k) complexity</li>
+<li>Adaptive chunk sizing based on data size and available cores</li>
+<li>Zero-copy views for isolate communication</li>
+<li>Automatic thread count detection based on platform</li>
+<li>Pre-allocated merge buffer to reduce GC pressure</li>
+<li>Early fallback for small datasets</li>
+</ul>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final numbers = List.generate(100000, (i) =&gt; 99999 - i);
-await radixSortParallelUnsigned(numbers, threads: 4);
+<pre class="language-dart"><code class="language-dart">final numbers = List.generate(1000000, (i) =&gt; 999999 - i);
+await radixSortParallelUnsigned(numbers);
 print(numbers.first); // 0
-print(numbers.last); // 99999
+print(numbers.last); // 999999
 </code></pre>
 <ul>
 <li><code>data</code>: The list of non-negative integers to be sorted.</li>
-<li><code>threads</code>: The number of parallel isolates to use. Defaults to 4.
-Higher numbers are effective for very large lists on machines with many
-CPU cores.</li>
+<li><code>threads</code>: The number of parallel isolates to use. If null, automatically
+detects the optimal number based on data size. Minimum is 2, maximum is 16.</li>
 </ul>
 </section>
 
@@ -89,12 +94,14 @@ CPU cores.</li>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; radixSortParallelUnsigned(
-  List&lt;int&gt; data, {
-  int threads = 4,
-}) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; radixSortParallelUnsigned(List&lt;int&gt; data, {int? threads}) async {
   final len = data.length;
-  if (len &lt; 4096 || threads &lt;= 1) {
+
+  &#47;&#47; Determine optimal thread count
+  final optimalThreads = threads ?? _calculateOptimalThreads(len);
+
+  &#47;&#47; Early fallback for small lists or single-threaded request
+  if (len &lt; 8192 || optimalThreads &lt;= 1) {
     final list = Uint32List.fromList(data);
     radixSortCore(list);
     for (var i = 0; i &lt; len; i++) {
@@ -105,55 +112,68 @@ CPU cores.</li>
 
   final receivePort = ReceivePort();
   final originalList = Uint32List.fromList(data);
-  final futures = &lt;Future&lt;void&gt;&gt;[];
-  final numThreads = max(1, threads);
+
+  &#47;&#47; Calculate chunk size with better load balancing
+  final numThreads = optimalThreads.clamp(2, 16);
   final chunkSize = (len &#47; numThreads).ceil();
 
+  &#47;&#47; Track spawned isolates
+  final isolates = &lt;Isolate&gt;[];
+  var chunksSpawned = 0;
+
+  &#47;&#47; Spawn isolates
   for (var i = 0; i &lt; numThreads; i++) {
     final start = i * chunkSize;
     if (start &gt;= len) break;
-    final end = min(start + chunkSize, len);
 
+    final end = min(start + chunkSize, len);
     final request = _IsolateSortRequest(
       receivePort.sendPort,
       originalList,
       start,
       end,
+      i, &#47;&#47; Chunk ID for maintaining order
     );
-    futures.add(Isolate.spawn(_isolateSortEntrypoint, request));
+
+    try {
+      final isolate = await Isolate.spawn(_isolateSortEntrypoint, request);
+      isolates.add(isolate);
+      chunksSpawned++;
+    } catch (e) {
+      &#47;&#47; If we fail to spawn an isolate, fall back to serial sort
+      receivePort.close();
+      for (final iso in isolates) {
+        iso.kill(priority: Isolate.immediate);
+      }
+
+      final list = Uint32List.fromList(data);
+      radixSortCore(list);
+      for (var i = 0; i &lt; len; i++) {
+        data[i] = list[i];
+      }
+      return;
+    }
   }
 
-  final sortedChunks = &lt;Uint32List&gt;[];
-  await for (final message in receivePort.take(futures.length)) {
-    sortedChunks.add(message as Uint32List);
+  &#47;&#47; Collect sorted chunks
+  final sortedChunks = &lt;_IsolateSortResponse&gt;[];
+
+  await for (final message in receivePort.take(chunksSpawned)) {
+    sortedChunks.add(message as _IsolateSortResponse);
   }
 
   receivePort.close();
-  await Future.wait(futures);
 
-  &#47;&#47; K-way merge of the sorted chunks.
-  final pointers = List.filled(sortedChunks.length, 0);
-  for (var i = 0; i &lt; len; i++) {
-    int? minVal;
-    int? minChunkIndex;
-
-    for (var j = 0; j &lt; sortedChunks.length; j++) {
-      if (pointers[j] &lt; sortedChunks[j].length) {
-        final currentVal = sortedChunks[j][pointers[j]];
-        if (minVal == null || currentVal &lt; minVal) {
-          minVal = currentVal;
-          minChunkIndex = j;
-        }
-      }
-    }
-
-    if (minChunkIndex != null) {
-      data[i] = minVal!;
-      pointers[minChunkIndex]++;
-    } else {
-      break;
-    }
+  &#47;&#47; Kill all isolates
+  for (final isolate in isolates) {
+    isolate.kill(priority: Isolate.immediate);
   }
+
+  &#47;&#47; Sort chunks by ID to maintain order
+  sortedChunks.sort((a, b) =&gt; a.chunkId.compareTo(b.chunkId));
+
+  &#47;&#47; K-way merge using min-heap for optimal performance
+  _kWayMergeOptimized(data, sortedChunks.map((r) =&gt; r.sortedChunk).toList());
 }</code></pre>
 </section>
 

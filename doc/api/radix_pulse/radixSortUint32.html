@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the radixSortBigInt function from the radix_pulse library, for the Dart programming language.">
-  <title>radixSortBigInt function - radix_pulse library - Dart API</title>
+  <meta name="description" content="API docs for the radixSortUint32 function from the radix_pulse library, for the Dart programming language.">
+  <title>radixSortUint32 function - radix_pulse library - Dart API</title>
 
 
   
@@ -26,9 +26,9 @@
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">radix_pulse</a></li>
     <li><a href="../radix_pulse/">radix_pulse.dart</a></li>
-    <li class="self-crumb">radixSortBigInt function</li>
+    <li class="self-crumb">radixSortUint32 function</li>
   </ol>
-  <div class="self-name">radixSortBigInt</div>
+  <div class="self-name">radixSortUint32</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -48,15 +48,16 @@
       data-above-sidebar="radix_pulse&#47;radix_pulse-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">radixSortBigInt</span> function 
+<h1><span class="kind-function">radixSortUint32</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype">void</span>
-<span class="name ">radixSortBigInt</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortBigInt-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
-<li><span class="parameter" id="radixSortBigInt-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
+<span class="name ">radixSortUint32</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortUint32-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Uint32List-class.html">Uint32List</a></span> <span class="parameter-name">data</span>, {</span></li>
+<li><span class="parameter" id="radixSortUint32-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
+<li><span class="parameter" id="radixSortUint32-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
 
         
@@ -64,86 +65,41 @@
     </section>
     
 <section class="desc markdown">
-  <p>Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.</p>
-<p><strong>Major optimizations:</strong></p>
-<ul>
-<li>
-<p>Fast path for small BigInts that fit in 64-bit integers</p>
-</li>
-<li>
-<p>Adaptive radix size (16-bit) for better cache performance</p>
-</li>
-<li>
-<p>Skip passes optimization for sparse bit patterns</p>
-</li>
-<li>
-<p>Pre-allocated buffers to reduce GC pressure</p>
-</li>
-<li>
-<p>Optimized partitioning with single-pass algorithm</p>
-</li>
-<li>
-<p>Efficient absolute value handling without creating new BigInts</p>
-</li>
-<li>
-<p><code>data</code>: The list of BigInts to be sorted in place.</p>
-</li>
-<li>
-<p><code>ascending</code>: Sort order (true for ascending, false for descending).</p>
-</li>
-</ul>
+  <p>Advanced version for unsigned 32-bit integers with zero-copy when possible.</p>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">final data = Uint32List.fromList([40, 1, 900, 10, 5]);
+radixSortUint32(data);
+print(data); // [1, 5, 10, 40, 900]
+</code></pre>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void radixSortBigInt(List&lt;BigInt&gt; data, {bool ascending = true}) {
-  final len = data.length;
-  if (len &lt; 2) {
+  <pre class="language-dart"><code class="language-dart">void radixSortUint32(
+  Uint32List data, {
+  bool ascending = true,
+  bool reuseBuffer = true,
+}) {
+  if (data.length &lt; 2) {
     return;
   }
 
-  &#47;&#47; Fast path: If all numbers fit in a 64-bit signed integer,
-  &#47;&#47; use the much faster integer-specific radix sort
-  bool canUseIntSort = true;
-  for (final n in data) {
-    if (!n.isValidInt) {
-      canUseIntSort = false;
-      break;
-    }
-  }
+  &#47;&#47; Sort directly - zero copy!
+  radixSortCore(data, reuseBuffer: reuseBuffer);
 
-  if (canUseIntSort) {
-    final intList = Int32List(len);
-    for (var i = 0; i &lt; len; i++) {
-      intList[i] = data[i].toInt();
-    }
-    radixSortInt(intList, signed: true, ascending: ascending);
-    for (var i = 0; i &lt; len; i++) {
-      data[i] = BigInt.from(intList[i]);
-    }
-    return;
-  }
-
-  &#47;&#47; 1. Partition the list in-place into negative and positive sections
-  final positiveStart = _partitionInPlace(data);
-
-  &#47;&#47; 2. Sort the negative part (if it exists)
-  if (positiveStart &gt; 0) {
-    &#47;&#47; Sort negatives by absolute value, then reverse the sorted slice
-    _radixSortPositiveBigInt(data, 0, positiveStart, sortByAbsolute: true);
-    _reverse(data, 0, positiveStart);
-  }
-
-  &#47;&#47; 3. Sort the positive part (if it exists)
-  if (positiveStart &lt; len) {
-    _radixSortPositiveBigInt(data, positiveStart, len);
-  }
-
-  &#47;&#47; 4. Handle descending order
+  &#47;&#47; Handle descending
   if (!ascending) {
-    _reverse(data, 0, len);
+    var left = 0;
+    var right = data.length - 1;
+    while (left &lt; right) {
+      final temp = data[left];
+      data[left] = data[right];
+      data[right] = temp;
+      left++;
+      right--;
+    }
   }
 }</code></pre>
 </section>
@@ -160,7 +116,7 @@
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">radix_pulse</a></li>
     <li><a href="../radix_pulse/">radix_pulse</a></li>
-    <li class="self-crumb">radixSortBigInt function</li>
+    <li class="self-crumb">radixSortUint32 function</li>
 </ol>
 
     <h5>radix_pulse library</h5>

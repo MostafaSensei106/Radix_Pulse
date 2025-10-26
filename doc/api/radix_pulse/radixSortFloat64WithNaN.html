@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the radixSortBigInt function from the radix_pulse library, for the Dart programming language.">
-  <title>radixSortBigInt function - radix_pulse library - Dart API</title>
+  <meta name="description" content="API docs for the radixSortFloat64WithNaN function from the radix_pulse library, for the Dart programming language.">
+  <title>radixSortFloat64WithNaN function - radix_pulse library - Dart API</title>
 
 
   
@@ -26,9 +26,9 @@
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">radix_pulse</a></li>
     <li><a href="../radix_pulse/">radix_pulse.dart</a></li>
-    <li class="self-crumb">radixSortBigInt function</li>
+    <li class="self-crumb">radixSortFloat64WithNaN function</li>
   </ol>
-  <div class="self-name">radixSortBigInt</div>
+  <div class="self-name">radixSortFloat64WithNaN</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -48,15 +48,17 @@
       data-above-sidebar="radix_pulse&#47;radix_pulse-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">radixSortBigInt</span> function 
+<h1><span class="kind-function">radixSortFloat64WithNaN</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype">void</span>
-<span class="name ">radixSortBigInt</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortBigInt-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
-<li><span class="parameter" id="radixSortBigInt-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
+<span class="name ">radixSortFloat64WithNaN</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortFloat64WithNaN-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Float64List-class.html">Float64List</a></span> <span class="parameter-name">data</span>, {</span></li>
+<li><span class="parameter" id="radixSortFloat64WithNaN-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
+<li><span class="parameter" id="radixSortFloat64WithNaN-param-nanPlacement"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">nanPlacement</span> = <span class="default-value">&#39;end&#39;</span>, </span></li>
+<li><span class="parameter" id="radixSortFloat64WithNaN-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
 
         
@@ -64,86 +66,63 @@
     </section>
     
 <section class="desc markdown">
-  <p>Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.</p>
-<p><strong>Major optimizations:</strong></p>
+  <p>Sorts a list of doubles with NaN handling options.</p>
+<p>Provides fine-grained control over how NaN values are handled during sorting.</p>
 <ul>
-<li>
-<p>Fast path for small BigInts that fit in 64-bit integers</p>
-</li>
-<li>
-<p>Adaptive radix size (16-bit) for better cache performance</p>
-</li>
-<li>
-<p>Skip passes optimization for sparse bit patterns</p>
-</li>
-<li>
-<p>Pre-allocated buffers to reduce GC pressure</p>
-</li>
-<li>
-<p>Optimized partitioning with single-pass algorithm</p>
-</li>
-<li>
-<p>Efficient absolute value handling without creating new BigInts</p>
-</li>
-<li>
-<p><code>data</code>: The list of BigInts to be sorted in place.</p>
-</li>
-<li>
-<p><code>ascending</code>: Sort order (true for ascending, false for descending).</p>
+<li><code>nanPlacement</code>: Where to place NaN values:
+<ul>
+<li><code>'start'</code>: NaNs at the beginning</li>
+<li><code>'end'</code>: NaNs at the end (default)</li>
+<li><code>'remove'</code>: Remove NaNs from the result</li>
+</ul>
 </li>
 </ul>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">final data = Float64List.fromList([1.0, double.nan, 3.0, double.nan, 2.0]);
+radixSortFloat64WithNaN(data, nanPlacement: 'end');
+// Result: [1.0, 2.0, 3.0, NaN, NaN]
+</code></pre>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void radixSortBigInt(List&lt;BigInt&gt; data, {bool ascending = true}) {
-  final len = data.length;
-  if (len &lt; 2) {
+  <pre class="language-dart"><code class="language-dart">void radixSortFloat64WithNaN(
+  Float64List data, {
+  bool ascending = true,
+  String nanPlacement = &#39;end&#39;,
+  bool reuseBuffer = true,
+}) {
+  if (data.length &lt; 2) {
     return;
   }
 
-  &#47;&#47; Fast path: If all numbers fit in a 64-bit signed integer,
-  &#47;&#47; use the much faster integer-specific radix sort
-  bool canUseIntSort = true;
-  for (final n in data) {
-    if (!n.isValidInt) {
-      canUseIntSort = false;
-      break;
+  &#47;&#47; Separate NaN values if needed
+  if (nanPlacement == &#39;remove&#39;) {
+    final nonNaN = &lt;double&gt;[];
+    for (var i = 0; i &lt; data.length; i++) {
+      if (!data[i].isNaN) {
+        nonNaN.add(data[i]);
+      }
     }
-  }
 
-  if (canUseIntSort) {
-    final intList = Int32List(len);
-    for (var i = 0; i &lt; len; i++) {
-      intList[i] = data[i].toInt();
-    }
-    radixSortInt(intList, signed: true, ascending: ascending);
-    for (var i = 0; i &lt; len; i++) {
-      data[i] = BigInt.from(intList[i]);
+    final temp = Float64List.fromList(nonNaN);
+    radixSortFloat64(temp, ascending: ascending, reuseBuffer: reuseBuffer);
+
+    &#47;&#47; Copy back
+    for (var i = 0; i &lt; temp.length; i++) {
+      data[i] = temp[i];
     }
     return;
   }
 
-  &#47;&#47; 1. Partition the list in-place into negative and positive sections
-  final positiveStart = _partitionInPlace(data);
+  &#47;&#47; For &#39;start&#39; or &#39;end&#39;, just sort normally and NaNs will be grouped
+  radixSortFloat64(data, ascending: ascending, reuseBuffer: reuseBuffer);
 
-  &#47;&#47; 2. Sort the negative part (if it exists)
-  if (positiveStart &gt; 0) {
-    &#47;&#47; Sort negatives by absolute value, then reverse the sorted slice
-    _radixSortPositiveBigInt(data, 0, positiveStart, sortByAbsolute: true);
-    _reverse(data, 0, positiveStart);
-  }
-
-  &#47;&#47; 3. Sort the positive part (if it exists)
-  if (positiveStart &lt; len) {
-    _radixSortPositiveBigInt(data, positiveStart, len);
-  }
-
-  &#47;&#47; 4. Handle descending order
-  if (!ascending) {
-    _reverse(data, 0, len);
+  &#47;&#47; If NaNs should be at start in ascending order, we need to rotate
+  if (nanPlacement == &#39;start&#39; &amp;&amp; ascending) {
+    _moveNaNsToStart(data);
   }
 }</code></pre>
 </section>
@@ -160,7 +139,7 @@
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">radix_pulse</a></li>
     <li><a href="../radix_pulse/">radix_pulse</a></li>
-    <li class="self-crumb">radixSortBigInt function</li>
+    <li class="self-crumb">radixSortFloat64WithNaN function</li>
 </ol>
 
     <h5>radix_pulse library</h5>

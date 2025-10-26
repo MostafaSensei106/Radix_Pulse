@@ -88,8 +88,21 @@
 
 </dd>
 
+          <dt id="estimateParallelPerformance" class="callable">
+  <span class="name"><a href="../radix_pulse/estimateParallelPerformance.html">estimateParallelPerformance</a></span><span class="signature">(<wbr><span class="parameter" id="estimateParallelPerformance-param-dataSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">dataSize</span>, {</span><span class="parameter" id="estimateParallelPerformance-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">threads</span> = <span class="default-value">4</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Estimates the speedup from parallel sorting.
+  
+
+</dd>
+
           <dt id="radixSortBigInt" class="callable">
-  <span class="name"><a href="../radix_pulse/radixSortBigInt.html">radixSortBigInt</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortBigInt-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span></span>)
+  <span class="name"><a href="../radix_pulse/radixSortBigInt.html">radixSortBigInt</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortBigInt-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortBigInt-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span></span>})
     <span class="returntype parameter">&#8594; void</span>
   </span>
   
@@ -101,8 +114,21 @@
 
 </dd>
 
+          <dt id="radixSortBigIntWithRange" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortBigIntWithRange.html">radixSortBigIntWithRange</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortBigIntWithRange-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortBigIntWithRange-param-maxBitLength"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxBitLength</span>, </span><span class="parameter" id="radixSortBigIntWithRange-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sorts a list of BigInts with range optimization.
+  
+
+</dd>
+
           <dt id="radixSortDouble" class="callable">
-  <span class="name"><a href="../radix_pulse/radixSortDouble.html">radixSortDouble</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortDouble-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortDouble-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
+  <span class="name"><a href="../radix_pulse/radixSortDouble.html">radixSortDouble</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortDouble-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortDouble-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span><span class="parameter" id="radixSortDouble-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
     <span class="returntype parameter">&#8594; void</span>
   </span>
   
@@ -110,6 +136,32 @@
 </dt>
 <dd>
   Sorts a list of doubles in place using a stable Radix Sort.
+  
+
+</dd>
+
+          <dt id="radixSortFloat64" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortFloat64.html">radixSortFloat64</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortFloat64-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Float64List-class.html">Float64List</a></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortFloat64-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span><span class="parameter" id="radixSortFloat64-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Advanced version that works directly with Float64List for maximum performance.
+  
+
+</dd>
+
+          <dt id="radixSortFloat64WithNaN" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortFloat64WithNaN.html">radixSortFloat64WithNaN</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortFloat64WithNaN-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Float64List-class.html">Float64List</a></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortFloat64WithNaN-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span><span class="parameter" id="radixSortFloat64WithNaN-param-nanPlacement"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">nanPlacement</span> = <span class="default-value">&#39;end&#39;</span>, </span><span class="parameter" id="radixSortFloat64WithNaN-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sorts a list of doubles with NaN handling options.
   
 
 </dd>
@@ -127,8 +179,47 @@
 
 </dd>
 
+          <dt id="radixSortInt32" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortInt32.html">radixSortInt32</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortInt32-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Int32List-class.html">Int32List</a></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortInt32-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span><span class="parameter" id="radixSortInt32-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Advanced version that works with pre-allocated typed lists for maximum performance.
+  
+
+</dd>
+
+          <dt id="radixSortParallelAdvanced" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortParallelAdvanced.html">radixSortParallelAdvanced</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelAdvanced-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelAdvanced-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span>, </span><span class="parameter" id="radixSortParallelAdvanced-param-signed"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">signed</span> = <span class="default-value">false</span>, </span><span class="parameter" id="radixSortParallelAdvanced-param-minChunkSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">minChunkSize</span> = <span class="default-value">8192</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Advanced parallel sort with custom merge strategy.
+  
+
+</dd>
+
+          <dt id="radixSortParallelSigned" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortParallelSigned.html">radixSortParallelSigned</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelSigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelSigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sorts a list of signed integers in parallel using Radix Sort.
+  
+
+</dd>
+
           <dt id="radixSortParallelUnsigned" class="callable">
-  <span class="name"><a href="../radix_pulse/radixSortParallelUnsigned.html">radixSortParallelUnsigned</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelUnsigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelUnsigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">threads</span> = <span class="default-value">4</span></span>})
+  <span class="name"><a href="../radix_pulse/radixSortParallelUnsigned.html">radixSortParallelUnsigned</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortParallelUnsigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortParallelUnsigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
   </span>
   
@@ -136,6 +227,19 @@
 </dt>
 <dd>
   Sorts a list of non-negative integers in parallel using Radix Sort.
+  
+
+</dd>
+
+          <dt id="radixSortUint32" class="callable">
+  <span class="name"><a href="../radix_pulse/radixSortUint32.html">radixSortUint32</a></span><span class="signature">(<wbr><span class="parameter" id="radixSortUint32-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-typed_data/Uint32List-class.html">Uint32List</a></span> <span class="parameter-name">data</span>, {</span><span class="parameter" id="radixSortUint32-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span><span class="parameter" id="radixSortUint32-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Advanced version for unsigned 32-bit integers with zero-copy when possible.
   
 
 </dd>

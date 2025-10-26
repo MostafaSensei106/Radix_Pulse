@@ -69,10 +69,16 @@
     
 <section class="desc markdown">
   <p>Sorts a list of integers in place using a stable Radix Sort.</p>
-<p>This is a unified sorting function for both signed and unsigned 32-bit integers.
+<p>This is an optimized unified sorting function for both signed and unsigned 32-bit integers.
 The implementation is chosen based on the <code>signed</code> parameter.</p>
-<p>The sort is stable, meaning that the relative order of equal elements is
-preserved.</p>
+<p>The sort is stable, meaning that the relative order of equal elements is preserved.</p>
+<p><strong>Performance optimizations:</strong></p>
+<ul>
+<li>Zero-copy operations when possible</li>
+<li>Direct buffer manipulation</li>
+<li>Efficient descending sort without recursion</li>
+<li>Reduced memory allocations</li>
+</ul>
 <p>Example (Signed):</p>
 <pre class="language-dart"><code class="language-dart">final numbers = [40, -1, 900, -10, 0, 5];
 radixSortInt(numbers, signed: true);
@@ -86,8 +92,10 @@ print(numbers); // [1, 5, 10, 40, 900]
 <ul>
 <li><code>data</code>: The list of integers to be sorted.</li>
 <li><code>signed</code>: Whether to treat the integers as signed or unsigned.</li>
-<li><code>reuseBuffer</code>: If <code>true</code>, the auxiliary buffer used for sorting will be
-sourced from a global pool.</li>
+<li><code>ascending</code>: Sort order (true for ascending, false for descending).</li>
+<li><code>bitsPerPass</code>: Number of bits per pass (currently only 8 is supported).</li>
+<li><code>stable</code>: Whether the sort is stable (currently always stable).</li>
+<li><code>reuseBuffer</code>: If <code>true</code>, reuses auxiliary buffers from a global pool.</li>
 </ul>
 </section>
 
@@ -99,62 +107,90 @@ sourced from a global pool.</li>
   List&lt;int&gt; data, {
   bool signed = true,
   bool ascending = true,
-  int bitsPerPass = 8, &#47;&#47; Currently ignored, but part of the API
-  bool stable = true, &#47;&#47; Currently ignored, the sort is always stable
+  int bitsPerPass = 8,
+  bool stable = true,
   bool reuseBuffer = true,
 }) {
   if (data.length &lt; 2) {
     return;
   }
 
-  &#47;&#47; A simple way to handle descending is to sort ascending and then reverse.
-  if (!ascending) {
-    radixSortInt(
-      data,
-      signed: signed,
-      ascending: true, &#47;&#47; Recurse with ascending
-      bitsPerPass: bitsPerPass,
-      stable: stable,
-      reuseBuffer: reuseBuffer,
-    );
-    &#47;&#47; Reverse the sorted list
-    for (int i = 0, j = data.length - 1; i &lt; j; i++, j--) {
-      final temp = data[i];
-      data[i] = data[j];
-      data[j] = temp;
-    }
-    return;
-  }
-
   if (bitsPerPass != 8) {
-    &#47;&#47; For now, only 8 bits per pass is implemented in the core logic.
     throw UnimplementedError(&#39;Only bitsPerPass = 8 is currently supported.&#39;);
   }
 
+  final n = data.length;
+
   if (signed) {
-    final list = Int32List.fromList(data);
-    final unsignedView = Uint32List.view(list.buffer);
+    &#47;&#47; Create typed array view for efficient manipulation
+    Uint32List workingList;
+    bool isDirectView = false;
+
+    &#47;&#47; Try to work directly with the buffer if data is already a typed list
+    if (data is Int32List) {
+      workingList = Uint32List.view(data.buffer, data.offsetInBytes, n);
+      isDirectView = true;
+    } else {
+      &#47;&#47; Need to create a copy
+      final list = Int32List(n);
+      for (var i = 0; i &lt; n; i++) {
+        list[i] = data[i];
+      }
+      workingList = Uint32List.view(list.buffer);
+    }
+
+    &#47;&#47; XOR with sign mask to convert signed to unsigned representation
     const signMask = 0x80000000;
-
-    for (var i = 0; i &lt; unsignedView.length; i++) {
-      unsignedView[i] ^= signMask;
+    for (var i = 0; i &lt; n; i++) {
+      workingList[i] ^= signMask;
     }
 
-    radixSortCore(unsignedView, reuseBuffer: reuseBuffer);
+    &#47;&#47; Perform the sort
+    radixSortCore(workingList, reuseBuffer: reuseBuffer);
 
-    for (var i = 0; i &lt; unsignedView.length; i++) {
-      unsignedView[i] ^= signMask;
+    &#47;&#47; Convert back from unsigned representation
+    for (var i = 0; i &lt; n; i++) {
+      workingList[i] ^= signMask;
     }
 
-    for (var i = 0; i &lt; data.length; i++) {
-      data[i] = list[i];
+    &#47;&#47; Copy back if needed
+    if (!isDirectView) {
+      final signedView = Int32List.view(workingList.buffer);
+      for (var i = 0; i &lt; n; i++) {
+        data[i] = signedView[i];
+      }
     }
   } else {
-    final list = Uint32List.fromList(data);
-    radixSortCore(list, reuseBuffer: reuseBuffer);
-    for (var i = 0; i &lt; data.length; i++) {
-      data[i] = list[i];
+    &#47;&#47; Unsigned integers
+    Uint32List workingList;
+    bool isDirectView = false;
+
+    &#47;&#47; Try to work directly with the buffer if data is already Uint32List
+    if (data is Uint32List) {
+      workingList = data;
+      isDirectView = true;
+    } else {
+      &#47;&#47; Create typed list for efficient sorting
+      workingList = Uint32List(n);
+      for (var i = 0; i &lt; n; i++) {
+        workingList[i] = data[i];
+      }
     }
+
+    &#47;&#47; Perform the sort
+    radixSortCore(workingList, reuseBuffer: reuseBuffer);
+
+    &#47;&#47; Copy back if needed
+    if (!isDirectView) {
+      for (var i = 0; i &lt; n; i++) {
+        data[i] = workingList[i];
+      }
+    }
+  }
+
+  &#47;&#47; Handle descending sort efficiently without recursion
+  if (!ascending) {
+    _reverseInPlace(data);
   }
 }</code></pre>
 </section>

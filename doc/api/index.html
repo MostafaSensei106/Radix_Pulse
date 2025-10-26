@@ -24,7 +24,7 @@
 <header id="title">
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
-    <li><a href="https://github.com/your_org/radix_pulse">radix_pulse package</a></li>
+    <li><a href="https://github.com/MostafaSensei106/Radix_Pulse">radix_pulse package</a></li>
   </ol>
   <div class="self-name">radix_pulse</div>
   <form class="search navbar-right" role="search">
@@ -43,42 +43,85 @@
   <div id="dartdoc-main-content" class="main-content">
       
 <section class="desc markdown">
-  <h1 id="radix-pulse">Radix Pulse</h1>
-<p><a href="https://pub.dev/packages/radix_pulse"><img src="https://img.shields.io/pub/v/radix_pulse.svg" alt="pub version"></a>
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a></p>
-<p>A high-performance, in-place Radix Sort implementation for Dart and Flutter.</p>
-<p>Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than <code>List.sort()</code> for specific data types, especially large lists of numbers.</p>
+  <h1 align="center">Radix Pulse</h1>
+<p align="center">
+  <img src="https://socialify.git.ci/MostafaSensei106/Radix_Pulse/image?custom_language=Dart&amp;font=KoHo&amp;language=1&amp;logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&amp;name=1&amp;owner=1&amp;pattern=Floating+Cogs&amp;theme=Light" alt="Radix Pulse Banner">
+</p>
+<p align="center">
+  <strong>A high-performance, in-place Radix Sort library for Dart and Flutter.</strong><br>
+  Fast. Efficient. Low-level sorting for number-intensive applications.
+</p>
+<p align="center">
+  <a href="#about">About</a> •
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage-examples">Usage</a> •
+  <a href="#benchmarks">Benchmarks</a> •
+  <a href="#contributing">Contributing</a> •
+  <a href="#license">License</a>
+</p>
+<hr>
+<h2 id="about">About</h2>
+<p>Welcome to <strong>Radix Pulse</strong> — a blazing-fast, in-place sorting library for Dart and Flutter.
+Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than <code>List.sort()</code> for specific data types, especially large lists of numbers (<code>int</code>, <code>double</code>, and <code>BigInt</code>). It uses low-level byte manipulation to achieve top-tier performance, making it ideal for data-intensive applications, scientific computing, and real-time data processing.</p>
+<hr>
 <h2 id="features">Features</h2>
+<h3 id="-core-functionality">🌟 Core Functionality</h3>
 <ul>
-<li><strong>High-Performance Sorting</strong>: Optimized for speed using low-level byte operations.</li>
-<li><strong>Unified Integer API</strong>: Sort <code>List&lt;int&gt;</code> with a single function, <code>radixSortInt</code>, for both signed and unsigned integers.</li>
-<li><strong>Floating-Point Support</strong>: Sort <code>List&lt;double&gt;</code> with <code>radixSortDouble</code>, correctly handling positive/negative values, infinities, and zero.</li>
-<li><strong>Parallel Sorting</strong>: <code>radixSortParallelUnsigned</code> leverages multiple CPU cores using Isolates to sort very large lists even faster.</li>
-<li><strong>Memory Efficient</strong>: Includes options for buffer reuse to minimize GC pressure on frequent sorting tasks.</li>
+<li><strong>Multi-Type Support</strong>: Sorts <code>List&lt;int&gt;</code>, <code>List&lt;double&gt;</code>, and <code>List&lt;BigInt&gt;</code>.</li>
 <li><strong>Stable Sort</strong>: Preserves the relative order of equal elements.</li>
+<li><strong>Unified Integer API</strong>: A single function, <code>radixSortInt</code>, handles both signed and unsigned integers.</li>
+<li><strong>Comprehensive Float Support</strong>: <code>radixSortDouble</code> correctly handles positive/negative values, infinities, and zero.</li>
 </ul>
-<h2 id="getting-started">Getting Started</h2>
-<h3 id="installation">Installation</h3>
+<h3 id="-advanced-capabilities">🛠️ Advanced Capabilities</h3>
+<ul>
+<li><strong>Parallel Sorting</strong>: <code>radixSortParallelUnsigned</code> leverages multiple CPU cores using Isolates to sort very large lists even faster.</li>
+<li><strong>Memory Efficiency</strong>: Includes a buffer pooling mechanism (<code>reuseBuffer: true</code>) to minimize GC pressure during frequent sorting tasks.</li>
+<li><strong>Zero-Copy Operations</strong>: Works directly on <code>TypedData</code> lists (<code>Int32List</code>, <code>Float64List</code>, etc.) to avoid unnecessary memory copies.</li>
+<li><strong>Adaptive Algorithms</strong>: Uses hybrid strategies (like switching to insertion sort for small sub-lists) for optimal performance across different data sizes.</li>
+</ul>
+<hr>
+<h2 id="installation">Installation</h2>
+<h3 id="-add-to-your-project">📦 Add to your project</h3>
+<ol>
+<li>
 <p>Add this to your package's <code>pubspec.yaml</code> file:</p>
 <pre class="language-yaml"><code class="language-yaml">dependencies:
   radix_pulse: ^1.0.0 # Replace with the latest version
 </code></pre>
-<p>Then, run <code>dart pub get</code> or <code>flutter pub get</code>.</p>
-<h2 id="usage">Usage</h2>
-<p>Import the library:</p>
-<pre class="language-dart"><code class="language-dart">import 'package:radix_pulse/radix_pulse.dart';
+</li>
+<li>
+<p>Install it from your terminal:</p>
+<pre class="language-bash"><code class="language-bash">dart pub get
 </code></pre>
+<p>or</p>
+<pre class="language-bash"><code class="language-bash">flutter pub get
+</code></pre>
+</li>
+</ol>
+<hr>
+<h2 id="-quick-start">🚀 Quick Start</h2>
+<p>Import the library and call the appropriate sorting function.</p>
+<pre class="language-dart"><code class="language-dart">import 'package:radix_pulse/radix_pulse.dart';
+
+// Sort a list of signed integers
+final numbers = [40, -1, 900, -10, 0, 5];
+radixSortInt(numbers); // Automatically handles signed integers
+print(numbers); // [-10, -1, 0, 5, 40, 900]
+</code></pre>
+<hr>
+<h2 id="-usage-examples">📋 Usage Examples</h2>
 <h3 id="sorting-integers">Sorting Integers</h3>
 <p>Use <code>radixSortInt</code> for both signed and unsigned integer lists.</p>
-<pre class="language-dart"><code class="language-dart">// Sort a list of signed integers
+<pre class="language-dart"><code class="language-dart">// Sort a list of signed integers (ascending)
 final signedNumbers = [40, -1, 900, -10, 0, 5];
-radixSortInt(signedNumbers, signed: true);
+radixSortInt(signedNumbers, ascending: true);
 print(signedNumbers); // [-10, -1, 0, 5, 40, 900]
 
-// Sort a list of unsigned integers
+// Sort a list of unsigned integers (descending)
 final unsignedNumbers = [40, 1, 900, 10, 5];
-radixSortInt(unsignedNumbers, signed: false);
-print(unsignedNumbers); // [1, 5, 10, 40, 900]
+radixSortInt(unsignedNumbers, signed: false, ascending: false);
+print(unsignedNumbers); // [900, 40, 10, 5, 1]
 </code></pre>
 <h3 id="sorting-doubles">Sorting Doubles</h3>
 <p>Use <code>radixSortDouble</code> for <code>List&lt;double&gt;</code>.</p>
@@ -86,45 +129,154 @@ print(unsignedNumbers); // [1, 5, 10, 40, 900]
 radixSortDouble(doubleNumbers);
 print(doubleNumbers); // [-10.0, -1.2, 0.0, 10.5, 900.0]
 </code></pre>
+<h3 id="sorting-bigints">Sorting BigInts</h3>
+<p>Use <code>radixSortBigInt</code> for <code>List&lt;BigInt&gt;</code>.</p>
+<pre class="language-dart"><code class="language-dart">final bigIntNumbers = [
+  BigInt.parse('100000000000000000000'),
+  BigInt.from(-100),
+  BigInt.parse('-200000000000000000000'),
+  BigInt.zero,
+];
+radixSortBigInt(bigIntNumbers);
+print(bigIntNumbers);
+</code></pre>
 <h3 id="parallel-sorting">Parallel Sorting</h3>
-<p>For very large lists, you can use <code>radixSortParallelUnsigned</code> to speed up sorting by using multiple isolates.</p>
+<p>For very large lists, <code>radixSortParallelUnsigned</code> can provide a significant speed boost.</p>
+<blockquote>
+<p><strong>Note</strong>: Parallel sorting is not available on the Web platform.</p>
+</blockquote>
 <pre class="language-dart"><code class="language-dart">// A large list of numbers
-final largeList = List.generate(100000, (i) =&gt; 99999 - i);
+final largeList = List.generate(1000000, (i) =&gt; 999999 - i);
 
-// Sort it in parallel across 4 threads
-await radixSortParallelUnsigned(largeList, threads: 4);
+// Sort it in parallel across multiple isolates
+await radixSortParallelUnsigned(largeList);
 
 print(largeList.first); // 0
-print(largeList.last); // 99999
+print(largeList.last); // 999999
 </code></pre>
-<h2 id="performance">Performance</h2>
-<p>Radix sort is not always faster than the default <code>List.sort()</code> (which uses IntroSort). It excels with large lists of numbers (integers or floats).</p>
-<p><strong>Baseline Benchmark (100,000 random 31-bit integers):</strong></p>
+<hr>
+<h2 id="-blazing-fast-performance">🚀 Blazing Fast Performance</h2>
+<p>Performance is the core feature of Radix Pulse. Our algorithms are consistently faster than the standard <code>List.sort()</code> for large numerical datasets, often by a significant margin.</p>
+<p>Here are the results from our benchmarks, running on a standard development machine with a list of <strong>1,000,000 random elements</strong>:</p>
+<h3 id="sorting-listint-32-bit-signed-integers">Sorting <code>List&lt;int&gt;</code> (32-bit Signed Integers)</h3>
 <table>
 <thead>
 <tr>
-<th>Benchmark</th>
-<th>Average Runtime (µs)</th>
-<th>Factor vs. List.sort()</th>
+<th>Method</th>
+<th>Average Time (ms)</th>
+<th>Speedup vs. <code>List.sort()</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>List.sort()</code></td>
-<td>87,165</td>
+<td>~1020</td>
 <td>1.0x</td>
 </tr>
 <tr>
-<td><code>radixSortInt (unsigned)</code></td>
-<td>16,742</td>
-<td>~5.2x faster</td>
+<td><strong><code>radixSortInt</code></strong></td>
+<td><strong>~281</strong></td>
+<td><strong>~3.6x faster</strong></td>
 </tr>
 </tbody>
 </table>
-<p><em>Lower is better. Your results may vary.</em></p>
-<h2 id="additional-information">Additional Information</h2>
-<p>This package is under active development. For more details, please see the <a href="https://pub.dev/documentation/radix_pulse/latest/">API documentation</a>.</p>
-<p>To file issues or contribute to the package, please visit the <a href="https://github.com/your_org/radix_pulse">GitHub repository</a>.</p>
+<h3 id="sorting-listdouble-64-bit-doubles">Sorting <code>List&lt;double&gt;</code> (64-bit Doubles)</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Average Time (ms)</th>
+<th>Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td>~4083</td>
+<td>1.0x</td>
+</tr>
+<tr>
+<td><strong><code>radixSortDouble</code></strong></td>
+<td><strong>~776</strong></td>
+<td><strong>~5.3x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="sorting-listbigint">Sorting <code>List&lt;BigInt&gt;</code></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Average Time (ms)</th>
+<th>Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td>~8666</td>
+<td>1.0x</td>
+</tr>
+<tr>
+<td><strong><code>radixSortBigInt</code></strong></td>
+<td><strong>~1481</strong></td>
+<td><strong>~5.8x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Your results may vary based on hardware, data distribution, and list size. To run the benchmarks yourself, see the <a href="./benchmark/results.md">benchmark/results.md</a> file.</em></p>
+<hr>
+<h2 id="technologies">Technologies</h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠 <strong>Dart</strong></td>
+<td><a href="https://dart.dev">dart.dev</a> — The core language for the library.</td>
+</tr>
+<tr>
+<td>⚡ <strong>Isolates</strong></td>
+<td><code>dart:isolate</code> — Used for parallel sorting to leverage multiple CPU cores.</td>
+</tr>
+<tr>
+<td>💾 <strong>TypedData</strong></td>
+<td><code>dart:typed_data</code> — Used for low-level, efficient memory manipulation.</td>
+</tr>
+<tr>
+<td>🧪 <strong>benchmark_harness</strong></td>
+<td>A framework for creating and running performance benchmarks.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="contributing">Contributing</h2>
+<p>Contributions are welcome! Here’s how to get started:</p>
+<ol>
+<li>Fork the repository.</li>
+<li>Create a new branch:
+<code>git checkout -b feature/YourFeature</code></li>
+<li>Commit your changes:
+<code>git commit -m "Add amazing feature"</code></li>
+<li>Push to your branch:
+<code>git push origin feature/YourFeature</code></li>
+<li>Open a pull request.</li>
+</ol>
+<blockquote>
+<p>💡 Please read our <a href="./CONTRIBUTING.md">Contributing Guidelines</a> and open an issue first for major feature ideas or changes.</p>
+</blockquote>
+<hr>
+<h2 id="license">License</h2>
+<p>This project is licensed under the <strong>MIT License</strong>.
+See the <a href="LICENSE">LICENSE</a> file for full details.</p>
+<p align="center">
+Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei106</a>
+</p>
 </section>
 
 
@@ -149,7 +301,7 @@ print(largeList.last); // 99999
   </form>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
-    <li><a href="https://github.com/your_org/radix_pulse">radix_pulse package</a></li>
+    <li><a href="https://github.com/MostafaSensei106/Radix_Pulse">radix_pulse package</a></li>
 </ol>
 
     <h5 class="hidden-xs"><span class="package-name">radix_pulse</span> <span class="package-kind">package</span></h5>

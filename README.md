@@ -1,60 +1,104 @@
-# Radix Pulse
+<h1 align="center">Radix Pulse</h1>
+<p align="center">
+  <img src="https://socialify.git.ci/MostafaSensei106/Radix_Pulse/image?custom_language=Dart&font=KoHo&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Radix Pulse Banner">
+</p>
 
-[![pub version](https://img.shields.io/pub/v/radix_pulse.svg)](https://pub.dev/packages/radix_pulse)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <strong>A high-performance, in-place Radix Sort library for Dart and Flutter.</strong><br>
+  Fast. Efficient. Low-level sorting for number-intensive applications.
+</p>
 
-A high-performance, in-place Radix Sort implementation for Dart and Flutter.
+<p align="center">
+  <a href="#about">About</a> •
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#usage-examples">Usage</a> •
+  <a href="#benchmarks">Benchmarks</a> •
+  <a href="#contributing">Contributing</a> •
+  <a href="#license">License</a>
+</p>
 
-Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than `List.sort()` for specific data types, especially large lists of numbers.
+---
+
+## About
+
+Welcome to **Radix Pulse** — a blazing-fast, in-place sorting library for Dart and Flutter.
+Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than `List.sort()` for specific data types, especially large lists of numbers (`int`, `double`, and `BigInt`). It uses low-level byte manipulation to achieve top-tier performance, making it ideal for data-intensive applications, scientific computing, and real-time data processing.
+
+---
 
 ## Features
 
-- **High-Performance Sorting**: Optimized for speed using low-level byte operations.
-- **Unified Integer API**: Sort `List<int>` with a single function, `radixSortInt`, for both signed and unsigned integers.
-- **Floating-Point Support**: Sort `List<double>` with `radixSortDouble`, correctly handling positive/negative values, infinities, and zero.
-- **Parallel Sorting**: `radixSortParallelUnsigned` leverages multiple CPU cores using Isolates to sort very large lists even faster.
-- **Memory Efficient**: Includes options for buffer reuse to minimize GC pressure on frequent sorting tasks.
+### 🌟 Core Functionality
+- **Multi-Type Support**: Sorts `List<int>`, `List<double>`, and `List<BigInt>`.
 - **Stable Sort**: Preserves the relative order of equal elements.
+- **Unified Integer API**: A single function, `radixSortInt`, handles both signed and unsigned integers.
+- **Comprehensive Float Support**: `radixSortDouble` correctly handles positive/negative values, infinities, and zero.
 
-## Getting Started
+### 🛠️ Advanced Capabilities
+- **Parallel Sorting**: `radixSortParallelUnsigned` leverages multiple CPU cores using Isolates to sort very large lists even faster.
+- **Memory Efficiency**: Includes a buffer pooling mechanism (`reuseBuffer: true`) to minimize GC pressure during frequent sorting tasks.
+- **Zero-Copy Operations**: Works directly on `TypedData` lists (`Int32List`, `Float64List`, etc.) to avoid unnecessary memory copies.
+- **Adaptive Algorithms**: Uses hybrid strategies (like switching to insertion sort for small sub-lists) for optimal performance across different data sizes.
 
-### Installation
+---
 
-Add this to your package's `pubspec.yaml` file:
+## Installation
 
-```yaml
-dependencies:
-  radix_pulse: ^1.0.0 # Replace with the latest version
-```
+### 📦 Add to your project
 
-Then, run `dart pub get` or `flutter pub get`.
+1.  Add this to your package's `pubspec.yaml` file:
 
-## Usage
+    ```yaml
+    dependencies:
+      radix_pulse: ^1.0.0 # Replace with the latest version
+    ```
 
-Import the library:
+2.  Install it from your terminal:
+
+    ```bash
+    dart pub get
+    ```
+    or
+    ```bash
+    flutter pub get
+    ```
+
+---
+
+## 🚀 Quick Start
+
+Import the library and call the appropriate sorting function.
 
 ```dart
 import 'package:radix_pulse/radix_pulse.dart';
+
+// Sort a list of signed integers
+final numbers = [40, -1, 900, -10, 0, 5];
+radixSortInt(numbers); // Automatically handles signed integers
+print(numbers); // [-10, -1, 0, 5, 40, 900]
 ```
 
-### Sorting Integers
+---
 
+## 📋 Usage Examples
+
+### Sorting Integers
 Use `radixSortInt` for both signed and unsigned integer lists.
 
 ```dart
-// Sort a list of signed integers
+// Sort a list of signed integers (ascending)
 final signedNumbers = [40, -1, 900, -10, 0, 5];
-radixSortInt(signedNumbers, signed: true);
+radixSortInt(signedNumbers, ascending: true);
 print(signedNumbers); // [-10, -1, 0, 5, 40, 900]
 
-// Sort a list of unsigned integers
+// Sort a list of unsigned integers (descending)
 final unsignedNumbers = [40, 1, 900, 10, 5];
-radixSortInt(unsignedNumbers, signed: false);
-print(unsignedNumbers); // [1, 5, 10, 40, 900]
+radixSortInt(unsignedNumbers, signed: false, ascending: false);
+print(unsignedNumbers); // [900, 40, 10, 5, 1]
 ```
 
 ### Sorting Doubles
-
 Use `radixSortDouble` for `List<double>`.
 
 ```dart
@@ -63,36 +107,103 @@ radixSortDouble(doubleNumbers);
 print(doubleNumbers); // [-10.0, -1.2, 0.0, 10.5, 900.0]
 ```
 
-### Parallel Sorting
+### Sorting BigInts
+Use `radixSortBigInt` for `List<BigInt>`.
 
-For very large lists, you can use `radixSortParallelUnsigned` to speed up sorting by using multiple isolates.
+```dart
+final bigIntNumbers = [
+  BigInt.parse('100000000000000000000'),
+  BigInt.from(-100),
+  BigInt.parse('-200000000000000000000'),
+  BigInt.zero,
+];
+radixSortBigInt(bigIntNumbers);
+print(bigIntNumbers);
+```
+
+### Parallel Sorting
+For very large lists, `radixSortParallelUnsigned` can provide a significant speed boost.
+
+> **Note**: Parallel sorting is not available on the Web platform.
 
 ```dart
 // A large list of numbers
-final largeList = List.generate(100000, (i) => 99999 - i);
+final largeList = List.generate(1000000, (i) => 999999 - i);
 
-// Sort it in parallel across 4 threads
-await radixSortParallelUnsigned(largeList, threads: 4);
+// Sort it in parallel across multiple isolates
+await radixSortParallelUnsigned(largeList);
 
 print(largeList.first); // 0
-print(largeList.last); // 99999
+print(largeList.last); // 999999
 ```
 
-## Performance
+---
 
-Radix sort is not always faster than the default `List.sort()` (which uses IntroSort). It excels with large lists of numbers (integers or floats).
+## 🚀 Blazing Fast Performance
 
-**Baseline Benchmark (100,000 random 31-bit integers):**
+Performance is the core feature of Radix Pulse. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
 
-| Benchmark                               | Average Runtime (µs) | Factor vs. List.sort() |
-| --------------------------------------- | -------------------- | ---------------------- |
-| `List.sort()`                           | 87,165               | 1.0x                   |
-| `radixSortInt (unsigned)`               | 16,742               | ~5.2x faster           |
+Here are the results from our benchmarks, running on a standard development machine with a list of **1,000,000 random elements**:
 
-*Lower is better. Your results may vary.*
+### Sorting `List<int>` (32-bit Signed Integers)
 
-## Additional Information
+| Method               | Average Time (ms) | Speedup vs. `List.sort()` |
+| -------------------- | ----------------- | ------------------------- |
+| `List.sort()`        | ~1020             | 1.0x                      |
+| **`radixSortInt`**   | **~281**          | **~3.6x faster**          |
 
-This package is under active development. For more details, please see the [API documentation](https://pub.dev/documentation/radix_pulse/latest/).
+### Sorting `List<double>` (64-bit Doubles)
 
-To file issues or contribute to the package, please visit the [GitHub repository](https://github.com/your_org/radix_pulse).
+| Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
+| ----------------------- | ----------------- | ------------------------- |
+| `List.sort()`           | ~4083             | 1.0x                      |
+| **`radixSortDouble`**   | **~776**          | **~5.3x faster**          |
+
+### Sorting `List<BigInt>`
+
+| Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
+| ----------------------- | ----------------- | ------------------------- |
+| `List.sort()`           | ~8666             | 1.0x                      |
+| **`radixSortBigInt`**   | **~1481**         | **~5.8x faster**          |
+
+---
+
+*Your results may vary based on hardware, data distribution, and list size. To run the benchmarks yourself, see the [benchmark/results.md](./benchmark/results.md) file.*
+
+---
+
+## Technologies
+
+| Technology | Description |
+|---|---|
+| 🧠 **Dart** | [dart.dev](https://dart.dev) — The core language for the library. |
+| ⚡ **Isolates** | `dart:isolate` — Used for parallel sorting to leverage multiple CPU cores. |
+| 💾 **TypedData** | `dart:typed_data` — Used for low-level, efficient memory manipulation. |
+| 🧪 **benchmark_harness** | A framework for creating and running performance benchmarks. |
+
+---
+
+## Contributing
+
+Contributions are welcome! Here’s how to get started:
+
+1.  Fork the repository.
+2.  Create a new branch:
+    `git checkout -b feature/YourFeature`
+3.  Commit your changes:
+    `git commit -m "Add amazing feature"`
+4.  Push to your branch:
+    `git push origin feature/YourFeature`
+5.  Open a pull request.
+
+> 💡 Please read our [Contributing Guidelines](./CONTRIBUTING.md) and open an issue first for major feature ideas or changes.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
+See the [LICENSE](LICENSE) file for full details.
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei106</a>
+</p>

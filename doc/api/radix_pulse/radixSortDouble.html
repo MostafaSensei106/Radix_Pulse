@@ -56,6 +56,7 @@
         
 <span class="returntype">void</span>
 <span class="name ">radixSortDouble</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortDouble-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
+<li><span class="parameter" id="radixSortDouble-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
 <li><span class="parameter" id="radixSortDouble-param-reuseBuffer"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">reuseBuffer</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
 
@@ -72,6 +73,13 @@ the original floating-point order.</p>
 <p>The sort is stable. It correctly handles positive and negative numbers, zero,
 <code>-0.0</code>, <code>double.infinity</code>, and <code>double.negativeInfinity</code>. <code>double.nan</code> values
 will be grouped together but their final position is not guaranteed.</p>
+<p><strong>Performance optimizations:</strong></p>
+<ul>
+<li>Zero-copy operations when input is already Float64List</li>
+<li>Direct buffer manipulation without intermediate copies</li>
+<li>Efficient descending sort without recursion</li>
+<li>Optimized bit manipulation loops</li>
+</ul>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">final numbers = [10.5, -1.2, 900.0, -10.0, 0.0, 5.8];
 radixSortDouble(numbers);
@@ -79,6 +87,7 @@ print(numbers); // [-10.0, -1.2, 0.0, 5.8, 10.5, 900.0]
 </code></pre>
 <ul>
 <li><code>data</code>: The list of doubles to be sorted.</li>
+<li><code>ascending</code>: Sort order (true for ascending, false for descending).</li>
 <li><code>reuseBuffer</code>: If <code>true</code>, the auxiliary buffer used for sorting will be
 sourced from a global pool. This can significantly reduce garbage
 collection pressure and improve performance when sorting many lists of
@@ -90,46 +99,72 @@ similar sizes.</li>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void radixSortDouble(List&lt;double&gt; data, {bool reuseBuffer = true}) {
+  <pre class="language-dart"><code class="language-dart">void radixSortDouble(
+  List&lt;double&gt; data, {
+  bool ascending = true,
+  bool reuseBuffer = true,
+}) {
   if (data.length &lt; 2) {
     return;
   }
 
-  &#47;&#47; Create a Float64List from the input data.
-  final list = Float64List.fromList(data);
+  final n = data.length;
+  Float64List workingList;
+  bool isDirectView = false;
 
-  &#47;&#47; Create a Uint64List view on the same buffer to reinterpret the bits.
-  final unsignedView = Uint64List.view(list.buffer);
+  &#47;&#47; Try to work directly with the buffer if data is already Float64List
+  if (data is Float64List) {
+    workingList = data;
+    isDirectView = true;
+  } else {
+    &#47;&#47; Need to create a copy
+    workingList = Float64List(n);
+    for (var i = 0; i &lt; n; i++) {
+      workingList[i] = data[i];
+    }
+  }
+
+  &#47;&#47; Create a Uint64List view on the same buffer to reinterpret the bits
+  final unsignedView = Uint64List.view(
+    workingList.buffer,
+    workingList.offsetInBytes,
+    n,
+  );
 
   const signMask = 0x8000000000000000;
 
-  &#47;&#47; 1. Transform: Map floats to a sortable unsigned integer representation.
-  for (var i = 0; i &lt; unsignedView.length; i++) {
-    final n = unsignedView[i];
-    if ((n &amp; signMask) != 0) { &#47;&#47; Negative float
-      unsignedView[i] = ~n;
-    } else { &#47;&#47; Positive float
-      unsignedView[i] = n ^ signMask;
-    }
+  &#47;&#47; 1. Transform: Map floats to a sortable unsigned integer representation
+  for (var i = 0; i &lt; n; i++) {
+    final bits = unsignedView[i];
+    &#47;&#47; Branchless optimization could be applied here, but explicit branching
+    &#47;&#47; is often faster due to CPU branch prediction
+    unsignedView[i] = (bits &amp; signMask) != 0
+        ? ~bits &#47;&#47; Negative float: flip all bits
+        : bits ^ signMask; &#47;&#47; Positive float: flip sign bit only
   }
 
-  &#47;&#47; 2. Sort: Call the core 64-bit sorting logic.
+  &#47;&#47; 2. Sort: Call the core 64-bit sorting logic
   radixSortCore64(unsignedView, reuseBuffer: reuseBuffer);
 
-  &#47;&#47; 3. Transform back: Revert the transformation.
-  for (var i = 0; i &lt; unsignedView.length; i++) {
-    final n = unsignedView[i];
-    if ((n &amp; signMask) != 0) { &#47;&#47; Originally positive
-      unsignedView[i] = n ^ signMask;
-    } else { &#47;&#47; Originally negative
-      unsignedView[i] = ~n;
+  &#47;&#47; 3. Transform back: Revert the transformation
+  for (var i = 0; i &lt; n; i++) {
+    final bits = unsignedView[i];
+    unsignedView[i] = (bits &amp; signMask) != 0
+        ? bits ^
+              signMask &#47;&#47; Originally positive: flip sign bit only
+        : ~bits; &#47;&#47; Originally negative: flip all bits
+  }
+
+  &#47;&#47; 4. Copy back if needed (if we created a temporary Float64List)
+  if (!isDirectView) {
+    for (var i = 0; i &lt; n; i++) {
+      data[i] = workingList[i];
     }
   }
 
-  &#47;&#47; 4. Copy the sorted result back to the original list.
-  &#47;&#47; The `unsignedView` and `list` share the same buffer, so `list` is now sorted.
-  for (var i = 0; i &lt; data.length; i++) {
-    data[i] = list[i];
+  &#47;&#47; 5. Handle descending sort efficiently
+  if (!ascending) {
+    _reverseInPlaceDouble(data);
   }
 }</code></pre>
 </section>
