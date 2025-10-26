@@ -188,13 +188,19 @@ void main() {
         final originalList = List.of(list);
         final expected = List.of(originalList)..sort();
         radixSortBigInt(originalList);
-        expect(listEquality.equals(originalList, expected), isTrue,
-            reason: 'Expected $expected, but got $originalList');
+        expect(
+          listEquality.equals(originalList, expected),
+          isTrue,
+          reason: 'Expected $expected, but got $originalList',
+        );
       });
     }
 
     testSort('should correctly sort a simple list of BigInts', [
-      BigInt.from(100), BigInt.from(-2), BigInt.from(50), BigInt.zero
+      BigInt.from(100),
+      BigInt.from(-2),
+      BigInt.from(50),
+      BigInt.zero,
     ]);
 
     testSort('should correctly sort a list with large BigInts', [
@@ -205,7 +211,10 @@ void main() {
     ]);
 
     testSort('should correctly sort a list with duplicates', [
-      BigInt.from(50), BigInt.from(-2), BigInt.from(50), BigInt.from(-2)
+      BigInt.from(50),
+      BigInt.from(-2),
+      BigInt.from(50),
+      BigInt.from(-2),
     ]);
   });
 }

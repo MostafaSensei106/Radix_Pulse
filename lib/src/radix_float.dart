@@ -40,9 +40,11 @@ void radixSortDouble(List<double> data, {bool reuseBuffer = true}) {
   // 1. Transform: Map floats to a sortable unsigned integer representation.
   for (var i = 0; i < unsignedView.length; i++) {
     final n = unsignedView[i];
-    if ((n & signMask) != 0) { // Negative float
+    if ((n & signMask) != 0) {
+      // Negative float
       unsignedView[i] = ~n;
-    } else { // Positive float
+    } else {
+      // Positive float
       unsignedView[i] = n ^ signMask;
     }
   }
@@ -53,9 +55,11 @@ void radixSortDouble(List<double> data, {bool reuseBuffer = true}) {
   // 3. Transform back: Revert the transformation.
   for (var i = 0; i < unsignedView.length; i++) {
     final n = unsignedView[i];
-    if ((n & signMask) != 0) { // Originally positive
+    if ((n & signMask) != 0) {
+      // Originally positive
       unsignedView[i] = n ^ signMask;
-    } else { // Originally negative
+    } else {
+      // Originally negative
       unsignedView[i] = ~n;
     }
   }

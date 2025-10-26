@@ -32,9 +32,15 @@ class BenchmarkResult {
   final int radixSortTime;
   final int listSize;
 
-  BenchmarkResult(this.name, this.listSortTime, this.radixSortTime, this.listSize);
+  BenchmarkResult(
+    this.name,
+    this.listSortTime,
+    this.radixSortTime,
+    this.listSize,
+  );
 
-  double get improvement => ((listSortTime - radixSortTime) / listSortTime) * 100;
+  double get improvement =>
+      ((listSortTime - radixSortTime) / listSortTime) * 100;
 }
 
 class BenchmarkPage extends StatefulWidget {
@@ -44,7 +50,8 @@ class BenchmarkPage extends StatefulWidget {
   State<BenchmarkPage> createState() => _BenchmarkPageState();
 }
 
-class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateMixin {
+class _BenchmarkPageState extends State<BenchmarkPage>
+    with TickerProviderStateMixin {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   final List<BenchmarkResult> _results = [];
   bool _isRunning = false;
@@ -55,12 +62,14 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     duration: const Duration(seconds: 10),
   )..repeat(reverse: true);
 
-  late final Animation<Alignment> _topAlignmentAnimation =
-      AlignmentTween(begin: Alignment.topLeft, end: Alignment.topRight)
-          .animate(_bgController);
-  late final Animation<Alignment> _bottomAlignmentAnimation =
-      AlignmentTween(begin: Alignment.bottomLeft, end: Alignment.bottomRight)
-          .animate(_bgController);
+  late final Animation<Alignment> _topAlignmentAnimation = AlignmentTween(
+    begin: Alignment.topLeft,
+    end: Alignment.topRight,
+  ).animate(_bgController);
+  late final Animation<Alignment> _bottomAlignmentAnimation = AlignmentTween(
+    begin: Alignment.bottomLeft,
+    end: Alignment.bottomRight,
+  ).animate(_bgController);
 
   Future<void> _runAllBenchmarks() async {
     if (_isRunning) return;
@@ -99,7 +108,10 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final results = <BenchmarkResult>[];
 
     // --- 1. Signed Integers ---
-    final signedInts = List.generate(size, (_) => random.nextInt(0x7FFFFFFF) - 0x40000000);
+    final signedInts = List.generate(
+      size,
+      (_) => random.nextInt(0x7FFFFFFF) - 0x40000000,
+    );
     final listCopy1 = List.of(signedInts);
     final radixCopy1 = List.of(signedInts);
     final sw1 = Stopwatch()..start();
@@ -108,7 +120,14 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final sw2 = Stopwatch()..start();
     radixSortInt(radixCopy1, signed: true);
     sw2.stop();
-    results.add(BenchmarkResult('Signed Integers', sw1.elapsedMicroseconds, sw2.elapsedMicroseconds, size));
+    results.add(
+      BenchmarkResult(
+        'Signed Integers',
+        sw1.elapsedMicroseconds,
+        sw2.elapsedMicroseconds,
+        size,
+      ),
+    );
 
     // --- 2. Unsigned Integers ---
     final unsignedInts = List.generate(size, (_) => random.nextInt(0x7FFFFFFF));
@@ -120,10 +139,20 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final sw4 = Stopwatch()..start();
     radixSortInt(radixCopy2, signed: false);
     sw4.stop();
-    results.add(BenchmarkResult('Unsigned Integers', sw3.elapsedMicroseconds, sw4.elapsedMicroseconds, size));
+    results.add(
+      BenchmarkResult(
+        'Unsigned Integers',
+        sw3.elapsedMicroseconds,
+        sw4.elapsedMicroseconds,
+        size,
+      ),
+    );
 
     // --- 3. Doubles ---
-    final doubles = List.generate(size, (_) => (random.nextDouble() - 0.5) * 1e6);
+    final doubles = List.generate(
+      size,
+      (_) => (random.nextDouble() - 0.5) * 1e6,
+    );
     final listCopy3 = List.of(doubles);
     final radixCopy3 = List.of(doubles);
     final sw5 = Stopwatch()..start();
@@ -132,10 +161,23 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final sw6 = Stopwatch()..start();
     radixSortDouble(radixCopy3);
     sw6.stop();
-    results.add(BenchmarkResult('Doubles', sw5.elapsedMicroseconds, sw6.elapsedMicroseconds, size));
+    results.add(
+      BenchmarkResult(
+        'Doubles',
+        sw5.elapsedMicroseconds,
+        sw6.elapsedMicroseconds,
+        size,
+      ),
+    );
 
     // --- 4. BigInts ---
-    final bigInts = List.generate(size, (_) => BigInt.from(random.nextInt(1 << 30)) * BigInt.from(random.nextInt(1 << 30)) * (random.nextBool() ? BigInt.one : -BigInt.one));
+    final bigInts = List.generate(
+      size,
+      (_) =>
+          BigInt.from(random.nextInt(1 << 30)) *
+          BigInt.from(random.nextInt(1 << 30)) *
+          (random.nextBool() ? BigInt.one : -BigInt.one),
+    );
     final listCopy4 = List.of(bigInts);
     final radixCopy4 = List.of(bigInts);
     final sw7 = Stopwatch()..start();
@@ -144,7 +186,14 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final sw8 = Stopwatch()..start();
     radixSortBigInt(radixCopy4);
     sw8.stop();
-    results.add(BenchmarkResult('BigInts', sw7.elapsedMicroseconds, sw8.elapsedMicroseconds, size));
+    results.add(
+      BenchmarkResult(
+        'BigInts',
+        sw7.elapsedMicroseconds,
+        sw8.elapsedMicroseconds,
+        size,
+      ),
+    );
 
     // --- 5. Parallel Unsigned Integers ---
     final parallelInts = List.generate(size, (_) => random.nextInt(0x7FFFFFFF));
@@ -156,7 +205,14 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
     final sw10 = Stopwatch()..start();
     await radixSortParallelUnsigned(radixCopy5, threads: 4);
     sw10.stop();
-    results.add(BenchmarkResult('Parallel Unsigned (4 Threads)', sw9.elapsedMicroseconds, sw10.elapsedMicroseconds, size));
+    results.add(
+      BenchmarkResult(
+        'Parallel Unsigned (4 Threads)',
+        sw9.elapsedMicroseconds,
+        sw10.elapsedMicroseconds,
+        size,
+      ),
+    );
 
     return results;
   }
@@ -209,12 +265,18 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
                           children: [
                             const CircularProgressIndicator(),
                             const SizedBox(height: 16),
-                            Text(_message, style: const TextStyle(fontSize: 16)),
+                            Text(
+                              _message,
+                              style: const TextStyle(fontSize: 16),
+                            ),
                           ],
                         )
                       : ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                             textStyle: const TextStyle(fontSize: 18),
                           ),
                           onPressed: _runAllBenchmarks,
@@ -256,7 +318,9 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
         child: Card(
           color: Colors.white.withOpacity(0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -265,14 +329,29 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
               children: [
                 Text(
                   result.name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const Divider(color: Colors.white24, height: 20),
-                _buildStatRow(Icons.timer_outlined, 'List.sort()', '${result.listSortTime} µs'),
-                _buildStatRow(Icons.flash_on, 'Radix Pulse', '${result.radixSortTime} µs'),
+                _buildStatRow(
+                  Icons.timer_outlined,
+                  'List.sort()',
+                  '${result.listSortTime} µs',
+                ),
+                _buildStatRow(
+                  Icons.flash_on,
+                  'Radix Pulse',
+                  '${result.radixSortTime} µs',
+                ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: improvementColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -281,7 +360,11 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(isPositive ? Icons.trending_up : Icons.trending_down, color: improvementColor, size: 20),
+                      Icon(
+                        isPositive ? Icons.trending_up : Icons.trending_down,
+                        color: improvementColor,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Improvement: $sign${result.improvement.toStringAsFixed(2)}%',
@@ -309,9 +392,19 @@ class _BenchmarkPageState extends State<BenchmarkPage> with TickerProviderStateM
         children: [
           Icon(icon, size: 18, color: Colors.white70),
           const SizedBox(width: 12),
-          Text('$label:', style: const TextStyle(fontSize: 15, color: Colors.white70)),
+          Text(
+            '$label:',
+            style: const TextStyle(fontSize: 15, color: Colors.white70),
+          ),
           const Spacer(),
-          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );
