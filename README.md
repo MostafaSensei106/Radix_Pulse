@@ -143,32 +143,32 @@ print(largeList.last); // 999999
 
 Performance is the core feature of Radix Pulse. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
 
-Here are the results from our benchmarks, running on a standard development machine with a list of **1,000,000 random elements**:
+To ensure accuracy, the results below are the **average of 10 separate benchmark runs** on a standard development machine, each sorting a list of **1,000,000 random elements**.
 
 ### Sorting `List<int>` (32-bit Signed Integers)
 
 | Method               | Average Time (ms) | Speedup vs. `List.sort()` |
 | -------------------- | ----------------- | ------------------------- |
-| `List.sort()`        | ~1020             | 1.0x                      |
-| **`radixSortInt`**   | **~281**          | **~3.6x faster**          |
+| `List.sort()`        | ~1071             | 1.0x                      |
+| **`radixSortInt`**   | **~312**          | **~3.4x faster**          |
 
 ### Sorting `List<double>` (64-bit Doubles)
 
 | Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
 | ----------------------- | ----------------- | ------------------------- |
-| `List.sort()`           | ~4083             | 1.0x                      |
-| **`radixSortDouble`**   | **~776**          | **~5.3x faster**          |
+| `List.sort()`           | ~3623             | 1.0x                      |
+| **`radixSortDouble`**   | **~916**          | **~4.0x faster**          |
 
 ### Sorting `List<BigInt>`
 
 | Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
 | ----------------------- | ----------------- | ------------------------- |
-| `List.sort()`           | ~8666             | 1.0x                      |
-| **`radixSortBigInt`**   | **~1481**         | **~5.8x faster**          |
+| `List.sort()`           | ~9579             | 1.0x                      |
+| **`radixSortBigInt`**   | **~1621**         | **~5.9x faster**          |
 
 ---
 
-*Your results may vary based on hardware, data distribution, and list size. To run the benchmarks yourself, see the [benchmark/results.md](./benchmark/results.md) file.*
+*Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the [benchmark/results.md](./benchmark/results.md) file.*
 
 ---
 

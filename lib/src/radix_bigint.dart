@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'radix_int.dart';
 
 // Optimized threshold based on benchmarking
-const int _INSERTION_SORT_THRESHOLD_BIGINT = 32;
+const int _insertionSortThresholdBigint = 32;
 
 /// Sorts a list of BigInts in place using a highly optimized, hybrid Radix Sort.
 ///
@@ -129,8 +129,7 @@ void _radixSortPositiveBigInt(
     return;
   }
 
-  // Hybrid approach: Use insertion sort for small lists
-  if (len < _INSERTION_SORT_THRESHOLD_BIGINT) {
+  if (len < _insertionSortThresholdBigint) {
     _insertionSort(list, start, end, sortByAbsolute: sortByAbsolute);
     return;
   }
