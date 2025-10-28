@@ -317,7 +317,6 @@ class _BenchmarkPageState extends State<BenchmarkPage>
           end: Offset.zero,
         ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
         child: Card(
-          color: Colors.white.withOpacity(0.1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -353,7 +352,6 @@ class _BenchmarkPageState extends State<BenchmarkPage>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: improvementColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: improvementColor, width: 1),
                   ),

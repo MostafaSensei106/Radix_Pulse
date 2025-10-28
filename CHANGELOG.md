@@ -1,18 +1,15 @@
 ## Changelog
 
-## 1.0.3
-
-- fix(core): Resolve linting issues and refine parallel export logic
-  - Update benchmark documentation in README and results.md with improved methodology and new performance data.
-  - Add publishing metadata and topics to pubspec.yaml.
-    Update CHANGELOG for version 1.0.3.
-
 ## 1.0.2
 
 - fix(core): Resolve linting issues and refine parallel export logic
 - Update benchmark documentation in README and results.md with improved methodology and new performance data.
 - Add publishing metadata and topics to pubspec.yaml.
   Update CHANGELOG for version 1.0.1.
+  - fix(core): Resolve linting issues and refine parallel export logic
+  - Update benchmark documentation in README and results.md with improved methodology and new performance data.
+  - Add publishing metadata and topics to pubspec.yaml.
+    Update CHANGELOG for version 1.0.2.
 
 ## 1.0.1
 
