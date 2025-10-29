@@ -7,6 +7,7 @@ topics: [sort, sorting, radix-sort, performance, algorithm, flutter, dart]
 
 repository: https://github.com/MostafaSensei106/Radix_Pulse
 homepage: https://github.com/MostafaSensei106/Radix_Pulse
+# funding: [https://github.com/sponsors/MostafaSensei106]
 
 environment:
   sdk: ^3.9.2
