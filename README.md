@@ -30,12 +30,14 @@ Radix Pulse provides a set of highly optimized, stable sorting algorithms that c
 ## Features
 
 ### 🌟 Core Functionality
+
 - **Multi-Type Support**: Sorts `List<int>`, `List<double>`, and `List<BigInt>`.
 - **Stable Sort**: Preserves the relative order of equal elements.
 - **Unified Integer API**: A single function, `radixSortInt`, handles both signed and unsigned integers.
 - **Comprehensive Float Support**: `radixSortDouble` correctly handles positive/negative values, infinities, and zero.
 
 ### 🛠️ Advanced Capabilities
+
 - **Parallel Sorting**: `radixSortParallelUnsigned` leverages multiple CPU cores using Isolates to sort very large lists even faster.
 - **Memory Efficiency**: Includes a buffer pooling mechanism (`reuseBuffer: true`) to minimize GC pressure during frequent sorting tasks.
 - **Zero-Copy Operations**: Works directly on `TypedData` lists (`Int32List`, `Float64List`, etc.) to avoid unnecessary memory copies.
@@ -59,7 +61,9 @@ Radix Pulse provides a set of highly optimized, stable sorting algorithms that c
     ```bash
     dart pub get
     ```
+
     or
+
     ```bash
     flutter pub get
     ```
@@ -84,6 +88,7 @@ print(numbers); // [-10, -1, 0, 5, 40, 900]
 ## 📋 Usage Examples
 
 ### Sorting Integers
+
 Use `radixSortInt` for both signed and unsigned integer lists.
 
 ```dart
@@ -99,6 +104,7 @@ print(unsignedNumbers); // [900, 40, 10, 5, 1]
 ```
 
 ### Sorting Doubles
+
 Use `radixSortDouble` for `List<double>`.
 
 ```dart
@@ -108,6 +114,7 @@ print(doubleNumbers); // [-10.0, -1.2, 0.0, 10.5, 900.0]
 ```
 
 ### Sorting BigInts
+
 Use `radixSortBigInt` for `List<BigInt>`.
 
 ```dart
@@ -122,6 +129,7 @@ print(bigIntNumbers);
 ```
 
 ### Parallel Sorting
+
 For very large lists, `radixSortParallelUnsigned` can provide a significant speed boost.
 
 > **Note**: Parallel sorting is not available on the Web platform.
@@ -147,39 +155,39 @@ To ensure accuracy, the results below are the **average of 10 separate benchmark
 
 ### Sorting `List<int>` (32-bit Signed Integers)
 
-| Method               | Average Time (ms) | Speedup vs. `List.sort()` |
-| -------------------- | ----------------- | ------------------------- |
-| `List.sort()`        | ~1071             | 1.0x                      |
-| **`radixSortInt`**   | **~312**          | **~3.4x faster**          |
+| Method             | Average Time (ms) | Speedup vs. `List.sort()` |
+| ------------------ | ----------------- | ------------------------- |
+| `List.sort()`      | ~1071             | 1.0x                      |
+| **`radixSortInt`** | **~312**          | **~3.4x faster**          |
 
 ### Sorting `List<double>` (64-bit Doubles)
 
-| Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
-| ----------------------- | ----------------- | ------------------------- |
-| `List.sort()`           | ~3623             | 1.0x                      |
-| **`radixSortDouble`**   | **~916**          | **~4.0x faster**          |
+| Method                | Average Time (ms) | Speedup vs. `List.sort()` |
+| --------------------- | ----------------- | ------------------------- |
+| `List.sort()`         | ~3623             | 1.0x                      |
+| **`radixSortDouble`** | **~916**          | **~4.0x faster**          |
 
 ### Sorting `List<BigInt>`
 
-| Method                  | Average Time (ms) | Speedup vs. `List.sort()` |
-| ----------------------- | ----------------- | ------------------------- |
-| `List.sort()`           | ~9579             | 1.0x                      |
-| **`radixSortBigInt`**   | **~1621**         | **~5.9x faster**          |
+| Method                | Average Time (ms) | Speedup vs. `List.sort()` |
+| --------------------- | ----------------- | ------------------------- |
+| `List.sort()`         | ~9579             | 1.0x                      |
+| **`radixSortBigInt`** | **~1621**         | **~5.9x faster**          |
 
 ---
 
-*Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the [benchmark/results.md](./benchmark/results.md) file.*
+_Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the [benchmark/results.md](./benchmark/results.md) file._
 
 ---
 
 ## Technologies
 
-| Technology | Description |
-|---|---|
-| 🧠 **Dart** | [dart.dev](https://dart.dev) — The core language for the library. |
-| ⚡ **Isolates** | `dart:isolate` — Used for parallel sorting to leverage multiple CPU cores. |
-| 💾 **TypedData** | `dart:typed_data` — Used for low-level, efficient memory manipulation. |
-| 🧪 **benchmark_harness** | A framework for creating and running performance benchmarks. |
+| Technology               | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| 🧠 **Dart**              | [dart.dev](https://dart.dev) — The core language for the library.          |
+| ⚡ **Isolates**          | `dart:isolate` — Used for parallel sorting to leverage multiple CPU cores. |
+| 💾 **TypedData**         | `dart:typed_data` — Used for low-level, efficient memory manipulation.     |
+| 🧪 **benchmark_harness** | A framework for creating and running performance benchmarks.               |
 
 ---
 
@@ -202,8 +210,9 @@ Contributions are welcome! Here’s how to get started:
 
 ## License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **GPL-V3.0 License**.
 See the [LICENSE](LICENSE) file for full details.
+
 <p align="center">
   Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei106</a>
 </p>
