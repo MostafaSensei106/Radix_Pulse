@@ -3,7 +3,7 @@ description: A high-performance, in-place Radix Sort implementation for Dart and
 version: 1.0.3
 
 license: GPL-version 3.0
-topics: [sort, sorting, radix-sort, performance, algorithm, flutter, dart]
+topics: [sort, radix-sort, algorithm, flutter, dart]
 
 repository: https://github.com/MostafaSensei106/Radix_Plus
 homepage: https://github.com/MostafaSensei106/Radix_Plus
