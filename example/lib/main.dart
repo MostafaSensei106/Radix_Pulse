@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
-import 'package:radix_plus/radix_pulse.dart';
+import 'package:radix_plus/radix_plus.dart';
 
 void main() {
   runApp(const MyApp());

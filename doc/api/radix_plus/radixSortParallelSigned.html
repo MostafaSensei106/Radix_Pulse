@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the radixSortParallelUnsigned function from the radix_pulse library, for the Dart programming language.">
-  <title>radixSortParallelUnsigned function - radix_pulse library - Dart API</title>
+  <meta name="description" content="API docs for the radixSortParallelSigned function from the radix_plus library, for the Dart programming language.">
+  <title>radixSortParallelSigned function - radix_plus library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">radix_plus</a></li>
-    <li><a href="../radix_pulse/">radix_pulse.dart</a></li>
-    <li class="self-crumb">radixSortParallelUnsigned function</li>
+    <li><a href="../radix_plus/">radix_plus.dart</a></li>
+    <li class="self-crumb">radixSortParallelSigned function</li>
   </ol>
-  <div class="self-name">radixSortParallelUnsigned</div>
+  <div class="self-name">radixSortParallelSigned</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,18 +45,18 @@
   <div
       id="dartdoc-main-content"
       class="main-content"
-      data-above-sidebar="radix_pulse&#47;radix_pulse-library-sidebar.html"
+      data-above-sidebar="radix_plus&#47;radix_plus-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">radixSortParallelUnsigned</span> function 
+<h1><span class="kind-function">radixSortParallelSigned</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">radixSortParallelUnsigned</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortParallelUnsigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
-<li><span class="parameter" id="radixSortParallelUnsigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span>, </span></li>
+<span class="name ">radixSortParallelSigned</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortParallelSigned-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
+<li><span class="parameter" id="radixSortParallelSigned-param-threads"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">threads</span>, </span></li>
 </ol>})
 
         
@@ -68,10 +68,25 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; radixSortParallelUnsigned(List&lt;int&gt; data, {int? threads}) async {
-  final list = Uint32List.fromList(data);
-  radixSortCore(list);
-  for (var i = 0; i &lt; data.length; i++) {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; radixSortParallelSigned(List&lt;int&gt; data, {int? threads}) async {
+  final len = data.length;
+  if (len &lt; 2) return;
+
+  final list = Int32List.fromList(data);
+  final unsignedView = Uint32List.view(list.buffer);
+
+  const signMask = 0x80000000;
+  for (var i = 0; i &lt; len; i++) {
+    unsignedView[i] ^= signMask;
+  }
+
+  radixSortCore(unsignedView);
+
+  for (var i = 0; i &lt; len; i++) {
+    unsignedView[i] ^= signMask;
+  }
+
+  for (var i = 0; i &lt; len; i++) {
     data[i] = list[i];
   }
 }</code></pre>
@@ -88,11 +103,11 @@
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">radix_plus</a></li>
-    <li><a href="../radix_pulse/">radix_pulse</a></li>
-    <li class="self-crumb">radixSortParallelUnsigned function</li>
+    <li><a href="../radix_plus/">radix_plus</a></li>
+    <li class="self-crumb">radixSortParallelSigned function</li>
 </ol>
 
-    <h5>radix_pulse library</h5>
+    <h5>radix_plus library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

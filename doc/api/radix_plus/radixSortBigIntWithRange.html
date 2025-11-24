@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the clearBufferPools function from the radix_pulse library, for the Dart programming language.">
-  <title>clearBufferPools function - radix_pulse library - Dart API</title>
+  <meta name="description" content="API docs for the radixSortBigIntWithRange function from the radix_plus library, for the Dart programming language.">
+  <title>radixSortBigIntWithRange function - radix_plus library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">radix_plus</a></li>
-    <li><a href="../radix_pulse/">radix_pulse.dart</a></li>
-    <li class="self-crumb">clearBufferPools function</li>
+    <li><a href="../radix_plus/">radix_plus.dart</a></li>
+    <li class="self-crumb">radixSortBigIntWithRange function</li>
   </ol>
-  <div class="self-name">clearBufferPools</div>
+  <div class="self-name">radixSortBigIntWithRange</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,37 +45,75 @@
   <div
       id="dartdoc-main-content"
       class="main-content"
-      data-above-sidebar="radix_pulse&#47;radix_pulse-library-sidebar.html"
+      data-above-sidebar="radix_plus&#47;radix_plus-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">clearBufferPools</span> function 
+<h1><span class="kind-function">radixSortBigIntWithRange</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype">void</span>
-<span class="name ">clearBufferPools</span>(<wbr>)
+<span class="name ">radixSortBigIntWithRange</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="radixSortBigIntWithRange-param-data"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/BigInt-class.html">BigInt</a></span>&gt;</span></span> <span class="parameter-name">data</span>, {</span></li>
+<li><span class="parameter" id="radixSortBigIntWithRange-param-maxBitLength"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxBitLength</span>, </span></li>
+<li><span class="parameter" id="radixSortBigIntWithRange-param-ascending"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">ascending</span> = <span class="default-value">true</span>, </span></li>
+</ol>})
 
         
 
     </section>
     
 <section class="desc markdown">
-  <p>A top-level function to clear all global buffer pools.</p>
-<p>This releases all <code>Uint32List</code> and <code>Uint64List</code> buffers that have been
-cached by the sorting functions when <code>reuseBuffer: true</code> was used.</p>
-<p>Call this function if you have finished a batch of sorting operations and
-want to release the memory held by the pools.</p>
+  <p>Sorts a list of BigInts with range optimization.</p>
+<p>If you know that your BigInts fall within a specific bit range,
+this can be significantly faster.</p>
+<p>Example:</p>
+<pre class="language-dart"><code class="language-dart">final data = [BigInt.from(100), BigInt.from(500), BigInt.from(1000)];
+radixSortBigIntWithRange(data, maxBitLength: 16);
+</code></pre>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void clearBufferPools() {
-  u32BufferPool.clear();
-  u64BufferPool.clear();
+  <pre class="language-dart"><code class="language-dart">void radixSortBigIntWithRange(
+  List&lt;BigInt&gt; data, {
+  required int maxBitLength,
+  bool ascending = true,
+}) {
+  final len = data.length;
+  if (len &lt; 2) {
+    return;
+  }
+
+  &#47;&#47; Direct partitioning and sorting with known max bit length
+  final positiveStart = _partitionInPlace(data);
+
+  if (positiveStart &gt; 0) {
+    _radixSortPositiveBigIntWithKnownMax(
+      data,
+      0,
+      positiveStart,
+      maxBitLength,
+      sortByAbsolute: true,
+    );
+    _reverse(data, 0, positiveStart);
+  }
+
+  if (positiveStart &lt; len) {
+    _radixSortPositiveBigIntWithKnownMax(
+      data,
+      positiveStart,
+      len,
+      maxBitLength,
+    );
+  }
+
+  if (!ascending) {
+    _reverse(data, 0, len);
+  }
 }</code></pre>
 </section>
 
@@ -90,11 +128,11 @@ want to release the memory held by the pools.</p>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">radix_plus</a></li>
-    <li><a href="../radix_pulse/">radix_pulse</a></li>
-    <li class="self-crumb">clearBufferPools function</li>
+    <li><a href="../radix_plus/">radix_plus</a></li>
+    <li class="self-crumb">radixSortBigIntWithRange function</li>
 </ol>
 
-    <h5>radix_pulse library</h5>
+    <h5>radix_plus library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

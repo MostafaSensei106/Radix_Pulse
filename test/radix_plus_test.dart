@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:radix_plus/radix_puls.dart';
+import 'package:radix_plus/radix_plus.dart';
 import 'package:test/test.dart';
 
 void main() {
