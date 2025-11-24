@@ -2,9 +2,9 @@
 
 ## 1.0.3
 
+- build(sdk): bump SDK requirement to 3.10.1
 - change(package): Rename project from Radix Pulse to Radix Plus
-
-Update package name, version to 1.0.3, and repository URLs. Adjust all internal and external references. Remove outdated API documentation.
+  Update package name, version to 1.0.3, and repository URLs. Adjust all internal and external references. Remove outdated API documentation.
 
 ## 1.0.2
 
