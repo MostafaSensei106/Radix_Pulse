@@ -53,7 +53,7 @@ Radix Plus provides a set of highly optimized, stable sorting algorithms that ca
 
     ```yaml
     dependencies:
-      radix_Pluse: ^1.0.0 # Replace with the latest version
+      radix_Plus: ^1.0.3 # Replace with the latest version
     ```
 
 2.  Install it from your terminal:
