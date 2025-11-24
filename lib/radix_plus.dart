@@ -1,8 +1,8 @@
-/// # radix_Pluse
+/// # radix_Plus
 ///
 /// ⚡ A high-performance, parallelized Radix Sort library for Dart.
 ///
-/// `radix_Pluse` brings **native-like speed** to Dart’s sorting world.
+/// `radix_Plus` brings **native-like speed** to Dart’s sorting world.
 /// It’s designed for developers who need *maximum performance*, *low GC pressure*,
 /// and *fine-grained control* over memory and threading.
 ///
@@ -39,7 +39,7 @@
 /// ## ⚙️ Example
 ///
 /// ```dart
-/// import 'package:radix_Pluse/radix_Pluse.dart';
+/// import 'package:radix_Plus/radix_Plus.dart';
 ///
 /// void main() {
 ///   final data = List.generate(1000000, (i) => 1000000 - i);
