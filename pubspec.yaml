@@ -10,7 +10,7 @@ homepage: https://github.com/MostafaSensei106/Radix_Plus
 # funding: [https://github.com/sponsors/MostafaSensei106]
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.1
 
 dependencies:
 
