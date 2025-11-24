@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:benchmark_harness/benchmark_harness.dart';
-import 'package:radix_plus/radix_pulse.dart';
+import 'package:radix_plus/radix_puls.dart';
 
 const int listSize = 1000000;
 const int maxIntValue = 0x7FFFFFFF;
