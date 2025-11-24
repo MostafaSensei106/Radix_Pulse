@@ -1,12 +1,12 @@
-name: radix_pulse
+name: radix_plus
 description: A high-performance, in-place Radix Sort implementation for Dart and Flutter, providing significant speed improvements over standard sorting for number lists.
-version: 1.0.2
+version: 1.0.3
 
 license: GPL-version 3.0
 topics: [sort, sorting, radix-sort, performance, algorithm, flutter, dart]
 
-repository: https://github.com/MostafaSensei106/Radix_Pulse
-homepage: https://github.com/MostafaSensei106/Radix_Pulse
+repository: https://github.com/MostafaSensei106/Radix_Plus
+homepage: https://github.com/MostafaSensei106/Radix_Plus
 # funding: [https://github.com/sponsors/MostafaSensei106]
 
 environment:

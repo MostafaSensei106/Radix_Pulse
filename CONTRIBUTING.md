@@ -1,13 +1,13 @@
-# Contributing to Radix Pulse
+# Contributing to Radix Pluse
 
-First off, thank you for considering contributing to Radix Pulse! It's people like you that make the open source community such a great place.
+First off, thank you for considering contributing to Radix Pluse! It's people like you that make the open source community such a great place.
 
 ## How Can I Contribute?
 
 ### Reporting Bugs
 
-- **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/MostafaSensei106/Radix_Pulse/issues).
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/MostafaSensei106/Radix_Pulse/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+- **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/MostafaSensei106/Radix_Plus/issues).
+- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/MostafaSensei106/Radix_Plus/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
 ### Suggesting Enhancements
 

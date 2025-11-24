@@ -1,6 +1,6 @@
-<h1 align="center">Radix Pulse</h1>
+<h1 align="center">Radix Plus</h1>
 <p align="center">
-  <img src="https://socialify.git.ci/MostafaSensei106/Radix_Pulse/image?custom_language=Dart&font=KoHo&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Radix Pulse Banner">
+  <img src="https://socialify.git.ci/MostafaSensei106/Radix_Plus/image?custom_language=Dart&font=KoHo&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F138288138%3Fv%3D4&name=1&owner=1&pattern=Floating+Cogs&theme=Light" alt="Radix Plus Banner">
 </p>
 
 <p align="center">
@@ -22,8 +22,8 @@
 
 ## About
 
-Welcome to **Radix Pulse** — a blazing-fast, in-place sorting library for Dart and Flutter.
-Radix Pulse provides a set of highly optimized, stable sorting algorithms that can be significantly faster than `List.sort()` for specific data types, especially large lists of numbers (`int`, `double`, and `BigInt`). It uses low-level byte manipulation to achieve top-tier performance, making it ideal for data-intensive applications, scientific computing, and real-time data processing.
+Welcome to **Radix Plus** — a blazing-fast, in-place sorting library for Dart and Flutter.
+Radix Plus provides a set of highly optimized, stable sorting algorithms that can be significantly faster than `List.sort()` for specific data types, especially large lists of numbers (`int`, `double`, and `BigInt`). It uses low-level byte manipulation to achieve top-tier performance, making it ideal for data-intensive applications, scientific computing, and real-time data processing.
 
 ---
 
@@ -53,7 +53,7 @@ Radix Pulse provides a set of highly optimized, stable sorting algorithms that c
 
     ```yaml
     dependencies:
-      radix_pulse: ^1.0.0 # Replace with the latest version
+      radix_Pluse: ^1.0.0 # Replace with the latest version
     ```
 
 2.  Install it from your terminal:
@@ -75,7 +75,7 @@ Radix Pulse provides a set of highly optimized, stable sorting algorithms that c
 Import the library and call the appropriate sorting function.
 
 ```dart
-import 'package:radix_pulse/radix_pulse.dart';
+import 'package:radix_Plus/radix_Plus.dart';
 
 // Sort a list of signed integers
 final numbers = [40, -1, 900, -10, 0, 5];
@@ -149,7 +149,7 @@ print(largeList.last); // 999999
 
 ## 🚀 Blazing Fast Performance
 
-Performance is the core feature of Radix Pulse. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
+Performance is the core feature of Radix Pluse. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
 
 To ensure accuracy, the results below are the **average of 10 separate benchmark runs** on a standard development machine, each sorting a list of **1,000,000 random elements**.
 
