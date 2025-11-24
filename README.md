@@ -149,7 +149,7 @@ print(largeList.last); // 999999
 
 ## 🚀 Blazing Fast Performance
 
-Performance is the core feature of Radix Pluse. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
+Performance is the core feature of Radix Plus. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
 
 To ensure accuracy, the results below are the **average of 10 separate benchmark runs** on a standard development machine, each sorting a list of **1,000,000 random elements**.
 

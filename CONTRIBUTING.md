@@ -1,6 +1,6 @@
-# Contributing to Radix Pluse
+# Contributing to Radix Plus
 
-First off, thank you for considering contributing to Radix Pluse! It's people like you that make the open source community such a great place.
+First off, thank you for considering contributing to Radix Plus! It's people like you that make the open source community such a great place.
 
 ## How Can I Contribute?
 

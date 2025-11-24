@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Radix Pluse Demo',
+      title: 'Radix Plus Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -242,7 +242,7 @@ class _BenchmarkPageState extends State<BenchmarkPage>
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Radix Pluse Benchmark'),
+          title: const Text('Radix Plus Benchmark'),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -253,7 +253,7 @@ class _BenchmarkPageState extends State<BenchmarkPage>
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text(
-                  'Time Performance: Radix Pluse vs List.sort()',
+                  'Time Performance: Radix Plus vs List.sort()',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -342,7 +342,7 @@ class _BenchmarkPageState extends State<BenchmarkPage>
                 ),
                 _buildStatRow(
                   Icons.flash_on,
-                  'Radix Pluse',
+                  'Radix Plus',
                   '${result.radixSortTime} µs',
                 ),
                 const SizedBox(height: 8),
