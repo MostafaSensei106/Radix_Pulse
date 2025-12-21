@@ -5,9 +5,21 @@ final class U32BufferPool {
   final _pool = <int, List<Uint32List>>{};
 
   Uint32List get(int size) {
-    if (_pool.containsKey(size) && _pool[size]!.isNotEmpty) {
-      return _pool[size]!.removeLast();
+    // Find the smallest buffer that is large enough
+    int? bestFitKey;
+    for (final key in _pool.keys) {
+      if (key >= size) {
+        if (bestFitKey == null || key < bestFitKey) {
+          bestFitKey = key;
+        }
+      }
     }
+
+    if (bestFitKey != null && _pool[bestFitKey]!.isNotEmpty) {
+      return _pool[bestFitKey]!.removeLast();
+    }
+
+    // No suitable buffer found, create a new one
     return Uint32List(size);
   }
 
@@ -29,9 +41,21 @@ final class U64BufferPool {
   final _pool = <int, List<Uint64List>>{};
 
   Uint64List get(int size) {
-    if (_pool.containsKey(size) && _pool[size]!.isNotEmpty) {
-      return _pool[size]!.removeLast();
+    // Find the smallest buffer that is large enough
+    int? bestFitKey;
+    for (final key in _pool.keys) {
+      if (key >= size) {
+        if (bestFitKey == null || key < bestFitKey) {
+          bestFitKey = key;
+        }
+      }
     }
+
+    if (bestFitKey != null && _pool[bestFitKey]!.isNotEmpty) {
+      return _pool[bestFitKey]!.removeLast();
+    }
+
+    // No suitable buffer found, create a new one
     return Uint64List(size);
   }
 

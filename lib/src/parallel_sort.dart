@@ -45,6 +45,78 @@ void _isolateSortEntrypoint(_IsolateSortRequest request) {
   request.sendPort.send(_IsolateSortResponse(sublist, request.chunkId));
 }
 
+/// Internal core parallel sort engine that works directly on [Uint32List].
+/// This avoids unnecessary list conversions and serves as the foundation for
+/// public-facing parallel sort APIs.
+Future<void> _radixSortParallelUint32(Uint32List data, {int? threads}) async {
+  final len = data.length;
+
+  // Determine optimal thread count
+  final optimalThreads = threads ?? _calculateOptimalThreads(len);
+
+  // Early fallback for small lists or single-threaded request
+  if (len < 8192 || optimalThreads <= 1) {
+    radixSortCore(data);
+    return;
+  }
+
+  final receivePort = ReceivePort();
+  final isolates = <Isolate>[];
+  int chunksSpawned = 0;
+
+  try {
+    // Calculate chunk size with better load balancing
+    final numThreads = optimalThreads.clamp(2, 16);
+    final chunkSize = (len / numThreads).ceil();
+
+    // Prepare all isolate spawn futures
+    final spawnFutures = <Future<Isolate>>[];
+    for (var i = 0; i < numThreads; i++) {
+      final start = i * chunkSize;
+      if (start >= len) break;
+
+      final end = min(start + chunkSize, len);
+      final request = _IsolateSortRequest(
+        receivePort.sendPort,
+        data,
+        start,
+        end,
+        i, // Chunk ID for maintaining order
+      );
+
+      spawnFutures.add(Isolate.spawn(_isolateSortEntrypoint, request));
+    }
+
+    // Await all spawns in parallel
+    isolates.addAll(await Future.wait(spawnFutures));
+    chunksSpawned = isolates.length;
+
+    // Collect sorted chunks
+    final sortedChunks = <_IsolateSortResponse>[];
+    await for (final message in receivePort.take(chunksSpawned)) {
+      sortedChunks.add(message as _IsolateSortResponse);
+    }
+
+    // Sort chunks by ID to maintain merge order
+    sortedChunks.sort((a, b) => a.chunkId.compareTo(b.chunkId));
+
+    // K-way merge using min-heap for optimal performance
+    _kWayMergeOptimizedUint32(
+      data,
+      sortedChunks.map((r) => r.sortedChunk).toList(),
+    );
+  } catch (e) {
+    // If we fail at any point, fall back to a safe serial sort
+    radixSortCore(data);
+  } finally {
+    // Ensure resources are always cleaned up
+    receivePort.close();
+    for (final isolate in isolates) {
+      isolate.kill(priority: Isolate.immediate);
+    }
+  }
+}
+
 /// Sorts a list of non-negative integers in parallel using Radix Sort.
 ///
 /// This function divides the list into chunks and sorts each chunk in a separate
@@ -52,12 +124,11 @@ void _isolateSortEntrypoint(_IsolateSortRequest request) {
 /// back together using an optimized k-way merge algorithm.
 ///
 /// **Major optimizations:**
-/// - Efficient k-way merge using a min-heap for O(n log k) complexity
-/// - Adaptive chunk sizing based on data size and available cores
-/// - Zero-copy views for isolate communication
-/// - Automatic thread count detection based on platform
-/// - Pre-allocated merge buffer to reduce GC pressure
-/// - Early fallback for small datasets
+/// - Parallel isolate spawning for faster startup.
+/// - Efficient k-way merge using a min-heap for O(n log k) complexity.
+/// - Adaptive chunk sizing based on data size and available cores.
+/// - Zero-copy views for isolate communication.
+/// - Automatic thread count detection based on platform.
 ///
 /// Example:
 /// ```dart
@@ -71,85 +142,19 @@ void _isolateSortEntrypoint(_IsolateSortRequest request) {
 /// - [threads]: The number of parallel isolates to use. If null, automatically
 ///   detects the optimal number based on data size. Minimum is 2, maximum is 16.
 Future<void> radixSortParallelUnsigned(List<int> data, {int? threads}) async {
-  final len = data.length;
+  if (data.length < 2) return;
 
-  // Determine optimal thread count
-  final optimalThreads = threads ?? _calculateOptimalThreads(len);
+  // Convert to Uint32List for efficient parallel processing
+  final list = (data is Uint32List) ? data : Uint32List.fromList(data);
 
-  // Early fallback for small lists or single-threaded request
-  if (len < 8192 || optimalThreads <= 1) {
-    final list = Uint32List.fromList(data);
-    radixSortCore(list);
-    for (var i = 0; i < len; i++) {
+  await _radixSortParallelUint32(list, threads: threads);
+
+  // Copy back if the original list was not a Uint32List
+  if (data is! Uint32List) {
+    for (var i = 0; i < data.length; i++) {
       data[i] = list[i];
     }
-    return;
   }
-
-  final receivePort = ReceivePort();
-  final originalList = Uint32List.fromList(data);
-
-  // Calculate chunk size with better load balancing
-  final numThreads = optimalThreads.clamp(2, 16);
-  final chunkSize = (len / numThreads).ceil();
-
-  // Track spawned isolates
-  final isolates = <Isolate>[];
-  var chunksSpawned = 0;
-
-  // Spawn isolates
-  for (var i = 0; i < numThreads; i++) {
-    final start = i * chunkSize;
-    if (start >= len) break;
-
-    final end = min(start + chunkSize, len);
-    final request = _IsolateSortRequest(
-      receivePort.sendPort,
-      originalList,
-      start,
-      end,
-      i, // Chunk ID for maintaining order
-    );
-
-    try {
-      final isolate = await Isolate.spawn(_isolateSortEntrypoint, request);
-      isolates.add(isolate);
-      chunksSpawned++;
-    } catch (e) {
-      // If we fail to spawn an isolate, fall back to serial sort
-      receivePort.close();
-      for (final iso in isolates) {
-        iso.kill(priority: Isolate.immediate);
-      }
-
-      final list = Uint32List.fromList(data);
-      radixSortCore(list);
-      for (var i = 0; i < len; i++) {
-        data[i] = list[i];
-      }
-      return;
-    }
-  }
-
-  // Collect sorted chunks
-  final sortedChunks = <_IsolateSortResponse>[];
-
-  await for (final message in receivePort.take(chunksSpawned)) {
-    sortedChunks.add(message as _IsolateSortResponse);
-  }
-
-  receivePort.close();
-
-  // Kill all isolates
-  for (final isolate in isolates) {
-    isolate.kill(priority: Isolate.immediate);
-  }
-
-  // Sort chunks by ID to maintain order
-  sortedChunks.sort((a, b) => a.chunkId.compareTo(b.chunkId));
-
-  // K-way merge using min-heap for optimal performance
-  _kWayMergeOptimized(data, sortedChunks.map((r) => r.sortedChunk).toList());
 }
 
 /// Calculates the optimal number of threads based on data size.
@@ -162,22 +167,20 @@ int _calculateOptimalThreads(int dataSize) {
   return 12; // Maximum reasonable threads for most systems
 }
 
-/// Optimized k-way merge using a min-heap.
-///
-/// Time complexity: O(n log k) where n is total elements and k is number of chunks.
-/// Space complexity: O(k) for the heap.
-void _kWayMergeOptimized(List<int> data, List<Uint32List> chunks) {
+/// Optimized k-way merge for Uint32List using a min-heap.
+void _kWayMergeOptimizedUint32(Uint32List data, List<Uint32List> chunks) {
   final len = data.length;
   final k = chunks.length;
 
   if (k == 0) return;
   if (k == 1) {
-    // Single chunk - direct copy
-    for (var i = 0; i < len; i++) {
-      data[i] = chunks[0][i];
-    }
+    // If there's only one chunk, it's already sorted in place. No copy needed.
     return;
   }
+
+  // Use a temporary buffer to merge into, then copy back.
+  // This is safer and avoids overwriting the source data during the merge.
+  final merged = Uint32List(len);
 
   // Initialize heap with first element from each chunk
   final heap = <_HeapNode>[];
@@ -196,7 +199,7 @@ void _kWayMergeOptimized(List<int> data, List<Uint32List> chunks) {
   for (var i = 0; i < len && heap.isNotEmpty; i++) {
     // Extract minimum
     final minNode = heap[0];
-    data[i] = minNode.value;
+    merged[i] = minNode.value;
 
     final chunkIndex = minNode.chunkIndex;
     pointers[chunkIndex]++;
@@ -214,6 +217,9 @@ void _kWayMergeOptimized(List<int> data, List<Uint32List> chunks) {
       }
     }
   }
+
+  // Copy the sorted, merged data back to the original list
+  data.setAll(0, merged);
 }
 
 /// Node in the min-heap.
@@ -256,6 +262,8 @@ void _heapifyDown(List<_HeapNode> heap, int index) {
 
 /// Sorts a list of signed integers in parallel using Radix Sort.
 ///
+/// This version is highly optimized to avoid intermediate list allocations.
+///
 /// Example:
 /// ```dart
 /// final numbers = [-500, 300, -100, 900, 0];
@@ -266,29 +274,31 @@ Future<void> radixSortParallelSigned(List<int> data, {int? threads}) async {
   final len = data.length;
   if (len < 2) return;
 
-  // Convert to unsigned representation
-  final list = Int32List.fromList(data);
+  // Create a typed list (copying if necessary)
+  final list = (data is Int32List) ? data : Int32List.fromList(data);
+
+  // Create a zero-copy view for bitwise operations
   final unsignedView = Uint32List.view(list.buffer);
 
+  // 1. Transform to sortable unsigned representation
   const signMask = 0x80000000;
   for (var i = 0; i < len; i++) {
     unsignedView[i] ^= signMask;
   }
 
-  // Convert to regular list for parallel sort
-  final tempData = List<int>.generate(len, (i) => unsignedView[i]);
+  // 2. Sort the view directly using the parallel engine (NO intermediate list)
+  await _radixSortParallelUint32(unsignedView, threads: threads);
 
-  // Sort using parallel algorithm
-  await radixSortParallelUnsigned(tempData, threads: threads);
-
-  // Convert back
+  // 3. Transform back to signed representation
   for (var i = 0; i < len; i++) {
-    unsignedView[i] = tempData[i] ^ signMask;
+    unsignedView[i] ^= signMask;
   }
 
-  // Copy back to original
-  for (var i = 0; i < len; i++) {
-    data[i] = list[i];
+  // 4. Copy back to original list if it wasn't an Int32List
+  if (data is! Int32List) {
+    for (var i = 0; i < len; i++) {
+      data[i] = list[i];
+    }
   }
 }
 
@@ -316,9 +326,9 @@ Future<Map<String, dynamic>> estimateParallelPerformance(
   int dataSize, {
   int threads = 4,
 }) async {
-  final overhead = 0.002; // ~2ms overhead per isolate
+  final overhead = 0.002;
   final mergeComplexity = dataSize * log(threads) / log(2);
-  final sortComplexity = dataSize * 32 / threads; // Radix sort is O(n*d)
+  final sortComplexity = dataSize * 32 / threads;
 
   final serialTime = dataSize * 32;
   final parallelTime =

@@ -8,3 +8,5 @@ pubspec.lock
 
 example/build/
 example/.dart_tool/
+
+res.md

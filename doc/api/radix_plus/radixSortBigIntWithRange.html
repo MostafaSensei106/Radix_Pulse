@@ -92,22 +92,22 @@ radixSortBigIntWithRange(data, maxBitLength: 16);
   final positiveStart = _partitionInPlace(data);
 
   if (positiveStart &gt; 0) {
-    _radixSortPositiveBigIntWithKnownMax(
+    _radixSortPositiveBigInt(
       data,
       0,
       positiveStart,
-      maxBitLength,
       sortByAbsolute: true,
+      maxBitLength: maxBitLength,
     );
     _reverse(data, 0, positiveStart);
   }
 
   if (positiveStart &lt; len) {
-    _radixSortPositiveBigIntWithKnownMax(
+    _radixSortPositiveBigInt(
       data,
       positiveStart,
       len,
-      maxBitLength,
+      maxBitLength: maxBitLength,
     );
   }
 

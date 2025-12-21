@@ -87,7 +87,7 @@ Radix Plus provides a set of highly optimized, stable sorting algorithms that ca
 <li>
 <p>Add this to your package's <code>pubspec.yaml</code> file:</p>
 <pre class="language-yaml"><code class="language-yaml">dependencies:
-  radix_Pluse: ^1.0.0 # Replace with the latest version
+  radix_Plus: ^1.0.3 # Replace with the latest version
 </code></pre>
 </li>
 <li>
@@ -157,75 +157,189 @@ print(largeList.last); // 999999
 <hr>
 <h2 id="-blazing-fast-performance">🚀 Blazing Fast Performance</h2>
 <p>Performance is the core feature of Radix Plus. Our algorithms are consistently faster than the standard <code>List.sort()</code> for large numerical datasets, often by a significant margin.</p>
-<p>To ensure accuracy, the results below are the <strong>average of 10 separate benchmark runs</strong> on a standard development machine, each sorting a list of <strong>1,000,000 random elements</strong>.</p>
-<h3 id="sorting-listint-32-bit-signed-integers">Sorting <code>List&lt;int&gt;</code> (32-bit Signed Integers)</h3>
+<p>To ensure accuracy, the results below are the <strong>average of 10 separate benchmark runs</strong> on a standard development machine <strong>AMD Ryzen™ 7 5800H</strong>, each sorting a list of <strong>1,000,000 random elements</strong>.</p>
+<h2 id="-integers-listint">🔹 Integers (<code>List&lt;int&gt;</code>)</h2>
 <table>
 <thead>
 <tr>
 <th>Method</th>
-<th>Average Time (ms)</th>
-<th>Speedup vs. <code>List.sort()</code></th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>List.sort()</code></td>
-<td>~1071</td>
-<td>1.0x</td>
+<td align="right">~1628</td>
+<td align="right">1.0x</td>
 </tr>
 <tr>
-<td><strong><code>radixSortInt</code></strong></td>
-<td><strong>~312</strong></td>
-<td><strong>~3.4x faster</strong></td>
-</tr>
-</tbody>
-</table>
-<h3 id="sorting-listdouble-64-bit-doubles">Sorting <code>List&lt;double&gt;</code> (64-bit Doubles)</h3>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Average Time (ms)</th>
-<th>Speedup vs. <code>List.sort()</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>List.sort()</code></td>
-<td>~3623</td>
-<td>1.0x</td>
-</tr>
-<tr>
-<td><strong><code>radixSortDouble</code></strong></td>
-<td><strong>~916</strong></td>
-<td><strong>~4.0x faster</strong></td>
-</tr>
-</tbody>
-</table>
-<h3 id="sorting-listbigint">Sorting <code>List&lt;BigInt&gt;</code></h3>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Average Time (ms)</th>
-<th>Speedup vs. <code>List.sort()</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>List.sort()</code></td>
-<td>~9579</td>
-<td>1.0x</td>
-</tr>
-<tr>
-<td><strong><code>radixSortBigInt</code></strong></td>
-<td><strong>~1621</strong></td>
-<td><strong>~5.9x faster</strong></td>
+<td><code>radixSortInt</code></td>
+<td align="right">~288</td>
+<td align="right"><strong>~5.6x faster</strong></td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><em>Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the <a href="./benchmark/results.md">benchmark/results.md</a> file.</em></p>
+<h2 id="-typed-lists-32-bit-integers">🔹 Typed Lists (32-bit Integers)</h2>
+<p>Typed lists (<code>Int32List</code>, <code>Uint32List</code>) achieve <strong>even better performance</strong> due to optimized memory layout.</p>
+<h3 id="-int32list">🔸 <code>Int32List</code></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td align="right">~1347</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortInt32</code></td>
+<td align="right">~210</td>
+<td align="right"><strong>~6.4x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="-uint32list">🔸 <code>Uint32List</code></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td align="right">~1344</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortUint32</code></td>
+<td align="right">~191</td>
+<td align="right"><strong>~7.0x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="-floating-point-numbers">🔹 Floating Point Numbers</h2>
+<p>Supports both <code>List&lt;double&gt;</code> and optimized <code>Float64List</code>, including <strong>correct handling of <code>NaN</code> values</strong>.</p>
+<h3 id="-listdouble">🔸 <code>List&lt;double&gt;</code></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td align="right">~2471</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortDouble</code></td>
+<td align="right">~571</td>
+<td align="right"><strong>~4.3x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="-float64list">🔸 <code>Float64List</code></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td align="right">~1493</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortFloat64</code></td>
+<td align="right">~387</td>
+<td align="right"><strong>~3.9x faster</strong></td>
+</tr>
+<tr>
+<td><code>radixSortFloat64WithNaN</code></td>
+<td align="right">~311</td>
+<td align="right"><strong>~4.8x faster</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="-bigint">🔹 BigInt</h2>
+<p>Efficient sorting for <strong>arbitrary-precision integers</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code></td>
+<td align="right">~6454</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortBigInt</code></td>
+<td align="right">~1092</td>
+<td align="right"><strong>~5.9x faster</strong></td>
+</tr>
+<tr>
+<td><code>radixSortBigIntWithRange</code></td>
+<td align="right">~6654</td>
+<td align="right"><strong>~0.97x</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>ℹ️ <code>radixSortBigIntWithRange</code> is optimized for <strong>specific range-based scenarios</strong>, not general-purpose sorting.</p>
+</blockquote>
+<hr>
+<h2 id="-parallel-sorting-multi-threaded">⚡ Parallel Sorting (Multi-threaded)</h2>
+<p>Leverages <strong>Dart Isolates</strong> to unlock massive speedups on multi-core CPUs.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th align="right">Average Time (ms)</th>
+<th align="right">Speedup vs. <code>List.sort()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List.sort()</code> (Standard int)</td>
+<td align="right">~1628</td>
+<td align="right">1.0x</td>
+</tr>
+<tr>
+<td><code>radixSortParallelUnsigned</code></td>
+<td align="right">~29</td>
+<td align="right"><strong>~56.5x faster</strong></td>
+</tr>
+<tr>
+<td><code>radixSortParallelSigned</code></td>
+<td align="right">~31</td>
+<td align="right"><strong>~52.2x faster</strong></td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2 id="technologies">Technologies</h2>
 <table>
@@ -287,7 +401,7 @@ Made with ❤️ by <a href="https://github.com/MostafaSensei106">MostafaSensei1
   <span class="name"><a href="radix_plus/">radix_plus</a></span> 
 
 </dt>
-<dd>radix_Pluse
+<dd>radix_Plus
 </dd>
 
         </dl>

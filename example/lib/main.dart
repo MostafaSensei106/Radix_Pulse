@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:radix_plus/radix_plus.dart';
 
@@ -13,398 +12,236 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Radix Plus Demo',
+      title: 'Radix Plus Example',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: Colors.indigo,
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFF121212),
       ),
-      home: const BenchmarkPage(),
+      home: const RadixExamplePage(),
     );
   }
 }
 
-class BenchmarkResult {
-  final String name;
-  final int listSortTime;
-  final int radixSortTime;
-  final int listSize;
-
-  BenchmarkResult(
-    this.name,
-    this.listSortTime,
-    this.radixSortTime,
-    this.listSize,
-  );
-
-  double get improvement =>
-      ((listSortTime - radixSortTime) / listSortTime) * 100;
-}
-
-class BenchmarkPage extends StatefulWidget {
-  const BenchmarkPage({super.key});
+class RadixExamplePage extends StatefulWidget {
+  const RadixExamplePage({super.key});
 
   @override
-  State<BenchmarkPage> createState() => _BenchmarkPageState();
+  State<RadixExamplePage> createState() => _RadixExamplePageState();
 }
 
-class _BenchmarkPageState extends State<BenchmarkPage>
-    with TickerProviderStateMixin {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  final List<BenchmarkResult> _results = [];
-  bool _isRunning = false;
-  String _message = 'Press the button to run all benchmarks.';
+class _RadixExamplePageState extends State<RadixExamplePage> {
+  final _random = Random();
 
-  late final AnimationController _bgController = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 10),
-  )..repeat(reverse: true);
+  // Data for Int sort
+  late List<int> _integers;
+  List<int>? _sortedIntegers;
 
-  late final Animation<Alignment> _topAlignmentAnimation = AlignmentTween(
-    begin: Alignment.topLeft,
-    end: Alignment.topRight,
-  ).animate(_bgController);
-  late final Animation<Alignment> _bottomAlignmentAnimation = AlignmentTween(
-    begin: Alignment.bottomLeft,
-    end: Alignment.bottomRight,
-  ).animate(_bgController);
+  // Data for Double sort
+  late List<double> _doubles;
+  List<double>? _sortedDoubles;
 
-  Future<void> _runAllBenchmarks() async {
-    if (_isRunning) return;
+  // Data for BigInt sort
+  late List<BigInt> _bigInts;
+  List<BigInt>? _sortedBigInts;
 
-    // Clear old results
-    for (var i = _results.length - 1; i >= 0; i--) {
-      _listKey.currentState?.removeItem(
-        i,
-        (context, animation) => const SizedBox.shrink(),
+  @override
+  void initState() {
+    super.initState();
+    _generateNewLists();
+  }
+
+  void _generateNewLists() {
+    setState(() {
+      _integers = List.generate(15, (_) => _random.nextInt(201) - 100);
+      _sortedIntegers = null;
+
+      _doubles = List.generate(15, (_) => (_random.nextDouble() - 0.5) * 200);
+      _sortedDoubles = null;
+
+      _bigInts = List.generate(
+        8,
+        (_) =>
+            BigInt.from(_random.nextInt(1 << 30)) *
+            BigInt.from(_random.nextInt(1 << 15)) *
+            (_random.nextBool() ? BigInt.one : -BigInt.one),
       );
-    }
-    _results.clear();
-
-    setState(() {
-      _isRunning = true;
-      _message = 'Warming up the engines...';
+      _sortedBigInts = null;
     });
-
-    final resultData = await Isolate.run(_performSorts);
-
-    setState(() {
-      _isRunning = false;
-      _message = 'Benchmark Results (List size: ${resultData.first.listSize})';
-    });
-
-    for (var i = 0; i < resultData.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 150));
-      _results.add(resultData[i]);
-      _listKey.currentState?.insertItem(i);
-    }
   }
 
-  static Future<List<BenchmarkResult>> _performSorts() async {
-    const size = 100000;
-    final random = Random();
-    final results = <BenchmarkResult>[];
-
-    // --- 1. Signed Integers ---
-    final signedInts = List.generate(
-      size,
-      (_) => random.nextInt(0x7FFFFFFF) - 0x40000000,
-    );
-    final listCopy1 = List.of(signedInts);
-    final radixCopy1 = List.of(signedInts);
-    final sw1 = Stopwatch()..start();
-    listCopy1.sort();
-    sw1.stop();
-    final sw2 = Stopwatch()..start();
-    radixSortInt(radixCopy1, signed: true);
-    sw2.stop();
-    results.add(
-      BenchmarkResult(
-        'Signed Integers',
-        sw1.elapsedMicroseconds,
-        sw2.elapsedMicroseconds,
-        size,
-      ),
-    );
-
-    // --- 2. Unsigned Integers ---
-    final unsignedInts = List.generate(size, (_) => random.nextInt(0x7FFFFFFF));
-    final listCopy2 = List.of(unsignedInts);
-    final radixCopy2 = List.of(unsignedInts);
-    final sw3 = Stopwatch()..start();
-    listCopy2.sort();
-    sw3.stop();
-    final sw4 = Stopwatch()..start();
-    radixSortInt(radixCopy2, signed: false);
-    sw4.stop();
-    results.add(
-      BenchmarkResult(
-        'Unsigned Integers',
-        sw3.elapsedMicroseconds,
-        sw4.elapsedMicroseconds,
-        size,
-      ),
-    );
-
-    // --- 3. Doubles ---
-    final doubles = List.generate(
-      size,
-      (_) => (random.nextDouble() - 0.5) * 1e6,
-    );
-    final listCopy3 = List.of(doubles);
-    final radixCopy3 = List.of(doubles);
-    final sw5 = Stopwatch()..start();
-    listCopy3.sort();
-    sw5.stop();
-    final sw6 = Stopwatch()..start();
-    radixSortDouble(radixCopy3);
-    sw6.stop();
-    results.add(
-      BenchmarkResult(
-        'Doubles',
-        sw5.elapsedMicroseconds,
-        sw6.elapsedMicroseconds,
-        size,
-      ),
-    );
-
-    // --- 4. BigInts ---
-    final bigInts = List.generate(
-      size,
-      (_) =>
-          BigInt.from(random.nextInt(1 << 30)) *
-          BigInt.from(random.nextInt(1 << 30)) *
-          (random.nextBool() ? BigInt.one : -BigInt.one),
-    );
-    final listCopy4 = List.of(bigInts);
-    final radixCopy4 = List.of(bigInts);
-    final sw7 = Stopwatch()..start();
-    listCopy4.sort();
-    sw7.stop();
-    final sw8 = Stopwatch()..start();
-    radixSortBigInt(radixCopy4);
-    sw8.stop();
-    results.add(
-      BenchmarkResult(
-        'BigInts',
-        sw7.elapsedMicroseconds,
-        sw8.elapsedMicroseconds,
-        size,
-      ),
-    );
-
-    // --- 5. Parallel Unsigned Integers ---
-    final parallelInts = List.generate(size, (_) => random.nextInt(0x7FFFFFFF));
-    final listCopy5 = List.of(parallelInts);
-    final radixCopy5 = List.of(parallelInts);
-    final sw9 = Stopwatch()..start();
-    listCopy5.sort();
-    sw9.stop();
-    final sw10 = Stopwatch()..start();
-    await radixSortParallelUnsigned(radixCopy5, threads: 4);
-    sw10.stop();
-    results.add(
-      BenchmarkResult(
-        'Parallel Unsigned (4 Threads)',
-        sw9.elapsedMicroseconds,
-        sw10.elapsedMicroseconds,
-        size,
-      ),
-    );
-
-    return results;
+  void _sortIntegers() {
+    final listToSort = List.of(_integers);
+    // Sorts the list of integers in place.
+    // The `signed` parameter should be true for lists containing negative numbers.
+    radixSortInt(listToSort, signed: true);
+    setState(() => _sortedIntegers = listToSort);
   }
 
-  @override
-  void dispose() {
-    _bgController.dispose();
-    super.dispose();
+  void _sortDoubles() {
+    final listToSort = List.of(_doubles);
+    // Sorts the list of doubles (Float64) in place.
+    radixSortDouble(listToSort);
+    setState(() => _sortedDoubles = listToSort);
+  }
+
+  void _sortBigInts() {
+    final listToSort = List.of(_bigInts);
+    // Sorts the list of BigInts in place.
+    radixSortBigInt(listToSort);
+    setState(() => _sortedBigInts = listToSort);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _bgController,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: const [Color(0xFF1E1E2E), Color(0xFF45456E)],
-              begin: _topAlignmentAnimation.value,
-              end: _bottomAlignmentAnimation.value,
-            ),
-          ),
-          child: child,
-        );
-      },
-      child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Radix Plus API Demo'),
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Radix Plus Benchmark'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Time Performance: Radix Plus vs List.sort()',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _isRunning
-                      ? Column(
-                          children: [
-                            const CircularProgressIndicator(),
-                            const SizedBox(height: 16),
-                            Text(
-                              _message,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        )
-                      : ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            textStyle: const TextStyle(fontSize: 18),
-                          ),
-                          onPressed: _runAllBenchmarks,
-                          icon: const Icon(Icons.rocket_launch),
-                          label: const Text('Run All Benchmarks'),
-                        ),
-                ),
-                const SizedBox(height: 24),
-                if (!_isRunning && _results.isEmpty)
-                  Text(_message, style: const TextStyle(fontSize: 16)),
-                Expanded(
-                  child: AnimatedList(
-                    key: _listKey,
-                    initialItemCount: _results.length,
-                    itemBuilder: (context, index, animation) {
-                      return _buildResultCard(_results[index], animation);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultCard(BenchmarkResult result, Animation<double> animation) {
-    final isPositive = result.improvement > 0;
-    final improvementColor = isPositive ? Colors.greenAccent : Colors.redAccent;
-    final sign = isPositive ? '+' : '';
-
-    return FadeTransition(
-      opacity: animation,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.5),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  result.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const Divider(color: Colors.white24, height: 20),
-                _buildStatRow(
-                  Icons.timer_outlined,
-                  'List.sort()',
-                  '${result.listSortTime} µs',
-                ),
-                _buildStatRow(
-                  Icons.flash_on,
-                  'Radix Plus',
-                  '${result.radixSortTime} µs',
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: improvementColor, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isPositive ? Icons.trending_up : Icons.trending_down,
-                        color: improvementColor,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Improvement: $sign${result.improvement.toStringAsFixed(2)}%',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: improvementColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.white70),
-          const SizedBox(width: 12),
-          Text(
-            '$label:',
-            style: const TextStyle(fontSize: 15, color: Colors.white70),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _generateNewLists,
+            tooltip: 'Generate New Lists',
           ),
         ],
       ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        children: <Widget>[
+          _SortExampleCard<int>(
+            title: 'Sorting Signed Integers',
+            unsortedList: _integers,
+            sortedList: _sortedIntegers,
+            onSort: _sortIntegers,
+            formatter: (i) => i.toString(),
+            apiCall: 'radixSortInt(list, signed: true);',
+          ),
+          const SizedBox(height: 20),
+          _SortExampleCard<double>(
+            title: 'Sorting Doubles',
+            unsortedList: _doubles,
+            sortedList: _sortedDoubles,
+            onSort: _sortDoubles,
+            formatter: (d) => d.toStringAsFixed(2),
+            apiCall: 'radixSortDouble(list);',
+          ),
+          const SizedBox(height: 20),
+          _SortExampleCard<BigInt>(
+            title: 'Sorting BigInts',
+            unsortedList: _bigInts,
+            sortedList: _sortedBigInts,
+            onSort: _sortBigInts,
+            formatter: (b) => b.toString(),
+            apiCall: 'radixSortBigInt(list);',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A reusable card widget to demonstrate a sort operation.
+class _SortExampleCard<T> extends StatelessWidget {
+  const _SortExampleCard({
+    required this.title,
+    required this.unsortedList,
+    required this.sortedList,
+    required this.onSort,
+    required this.formatter,
+    required this.apiCall,
+    super.key,
+  });
+
+  final String title;
+  final List<T> unsortedList;
+  final List<T>? sortedList;
+  final VoidCallback onSort;
+  final String Function(T) formatter;
+  final String apiCall;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+              child: Text(
+                apiCall,
+                style: textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+              ),
+            ),
+            const Divider(height: 24),
+            _buildList('Unsorted', unsortedList, formatter, textTheme),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: onSort,
+                icon: const Icon(Icons.sort),
+                label: const Text('Sort'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (sortedList != null)
+              _buildList(
+                'Sorted',
+                sortedList!,
+                formatter,
+                textTheme,
+                highlightColor: colorScheme.secondaryContainer,
+                textColor: colorScheme.onSecondaryContainer,
+              )
+            else
+              const Center(
+                child: Opacity(
+                  opacity: 0.7,
+                  child: Text('(Press "Sort" to see the result)'),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(
+    String label,
+    List<T> list,
+    String Function(T) formatter,
+    TextTheme textTheme, {
+    Color? highlightColor,
+    Color? textColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+          child: Text(
+            list.map(formatter).join(', '),
+            style: TextStyle(height: 1.5, color: textColor),
+          ),
+        ),
+      ],
     );
   }
 }
