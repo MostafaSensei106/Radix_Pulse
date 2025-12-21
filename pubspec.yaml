@@ -1,6 +1,6 @@
 name: radix_plus
 description: A high-performance, in-place Radix Sort implementation for Dart and Flutter, providing significant speed improvements over standard sorting for number lists.
-version: 1.0.3
+version: 1.0.4
 
 license: GPL-version 3.0
 topics: [sort, radix-sort, algorithm, flutter, dart]
