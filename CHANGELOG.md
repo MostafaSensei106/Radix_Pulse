@@ -1,5 +1,18 @@
 ## Changelog
 
+## 1.0.4
+
+- perf(parallel): Overhaul parallel sorting for improved performance and memory usage.
+  - Isolates are now spawned in parallel using `Future.wait` to reduce startup overhead.
+  - `radixSortParallelSigned` now avoids intermediate list allocations, significantly reducing GC pressure.
+  - Created a core `_radixSortParallelUint32` engine to streamline parallel logic.
+- perf(bigint): Optimize `radixSortBigInt` memory management.
+  - The auxiliary buffer is now allocated only once, reducing GC pressure during sorting.
+  - Refactored and unified internal BigInt sorting functions to reduce code duplication.
+- perf(utils): Enhance buffer pool logic.
+  - The `get` method in buffer pools now finds the best-fit buffer (>= requested size) to increase hit rate.
+- style(core): Minor code cleanup using `fillRange` for array initialization.
+
 ## 1.0.3
 
 - build(sdk): bump SDK requirement to 3.10.1

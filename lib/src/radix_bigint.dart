@@ -115,7 +115,7 @@ void _reverse(List<BigInt> list, int start, int end) {
 ///
 /// **Key optimizations:**
 /// - Skip passes where all values share the same radix digit
-/// - Pre-calculate bit length only once per element
+/// - Pre-calculate bit length only once per element if not provided
 /// - Reuse buffers across passes
 /// - Optimize bucket extraction with bitwise operations
 void _radixSortPositiveBigInt(
@@ -123,6 +123,7 @@ void _radixSortPositiveBigInt(
   int start,
   int end, {
   bool sortByAbsolute = false,
+  int? maxBitLength,
 }) {
   final len = end - start;
   if (len < 2) {
@@ -134,33 +135,36 @@ void _radixSortPositiveBigInt(
     return;
   }
 
-  // Find the max bit length to determine the number of passes
-  var maxBitLength = 0;
-  for (var i = start; i < end; i++) {
-    final n = list[i];
-    final bitLength = sortByAbsolute ? n.abs().bitLength : n.bitLength;
-    if (bitLength > maxBitLength) {
-      maxBitLength = bitLength;
+  // Find the max bit length if not provided
+  var effectiveMaxBitLength = maxBitLength ?? 0;
+  if (maxBitLength == null) {
+    for (var i = start; i < end; i++) {
+      final n = list[i];
+      final bitLength = sortByAbsolute ? n.abs().bitLength : n.bitLength;
+      if (bitLength > effectiveMaxBitLength) {
+        effectiveMaxBitLength = bitLength;
+      }
     }
   }
 
   // Early exit if all numbers are zero
-  if (maxBitLength == 0) {
+  if (effectiveMaxBitLength == 0) {
     return;
   }
 
   const bitsPerPass = 16;
   const radixSize = 1 << bitsPerPass; // 65536
   const mask = radixSize - 1;
-  final passes = (maxBitLength + bitsPerPass - 1) ~/ bitsPerPass;
+  final passes = (effectiveMaxBitLength + bitsPerPass - 1) ~/ bitsPerPass;
 
-  // Pre-allocate buffers
-  var currentList = list;
+  // Pre-allocate buffers ONCE outside the loop
+
   var otherList = List<BigInt>.filled(len, BigInt.zero);
   final count = Uint32List(radixSize);
 
-  // Track if we're working with the original list or auxiliary buffer
-  var workingWithOriginal = true;
+  // Use a flag to determine if we need to copy back to the original list slice.
+  // This is simpler than tracking the original list reference.
+  var isSortedInOriginal = true;
 
   for (var pass = 0; pass < passes; ++pass) {
     final shift = pass * bitsPerPass;
@@ -168,14 +172,17 @@ void _radixSortPositiveBigInt(
     // Reset count array efficiently
     count.fillRange(0, radixSize, 0);
 
+    // Use a direct view of the source list for counting
+    final sourceList = isSortedInOriginal ? list : otherList;
+    final sourceOffset = isSortedInOriginal ? start : 0;
+
     // Track min/max bucket for skip optimization
     var minBucket = radixSize - 1;
     var maxBucket = 0;
 
     // Count phase with skip detection
     for (var i = 0; i < len; i++) {
-      final idx = workingWithOriginal ? start + i : i;
-      final n = currentList[idx];
+      final n = sourceList[sourceOffset + i];
       final value = sortByAbsolute ? n.abs() : n;
 
       // Extract bucket value efficiently
@@ -198,32 +205,24 @@ void _radixSortPositiveBigInt(
     }
 
     // Distribution phase
+    final destinationList = isSortedInOriginal ? otherList : list;
+    final destinationOffset = isSortedInOriginal ? 0 : start;
+
     for (var i = len - 1; i >= 0; --i) {
-      final idx = workingWithOriginal ? start + i : i;
-      final n = currentList[idx];
+      final n = sourceList[sourceOffset + i];
       final value = sortByAbsolute ? n.abs() : n;
       final bucket = (value >> shift).toInt() & mask;
-      otherList[--count[bucket]] = n;
+      destinationList[destinationOffset + --count[bucket]] = n;
     }
 
-    // Swap buffers
-    final tempList = currentList;
-    currentList = otherList;
-
-    if (workingWithOriginal) {
-      // First pass: create new auxiliary buffer for next iteration
-      otherList = List<BigInt>.filled(len, BigInt.zero);
-      workingWithOriginal = false;
-    } else {
-      // Subsequent passes: reuse the old buffer
-      otherList = tempList;
-    }
+    // Flip the flag for the next pass
+    isSortedInOriginal = !isSortedInOriginal;
   }
 
-  // Copy back to original list if needed
-  if (currentList != list) {
+  // If the data ended up in the auxiliary buffer, copy it back to the original list slice.
+  if (!isSortedInOriginal) {
     for (var i = 0; i < len; i++) {
-      list[start + i] = currentList[i];
+      list[start + i] = otherList[i];
     }
   }
 }
@@ -294,92 +293,26 @@ void radixSortBigIntWithRange(
   final positiveStart = _partitionInPlace(data);
 
   if (positiveStart > 0) {
-    _radixSortPositiveBigIntWithKnownMax(
+    _radixSortPositiveBigInt(
       data,
       0,
       positiveStart,
-      maxBitLength,
       sortByAbsolute: true,
+      maxBitLength: maxBitLength,
     );
     _reverse(data, 0, positiveStart);
   }
 
   if (positiveStart < len) {
-    _radixSortPositiveBigIntWithKnownMax(
+    _radixSortPositiveBigInt(
       data,
       positiveStart,
       len,
-      maxBitLength,
+      maxBitLength: maxBitLength,
     );
   }
 
   if (!ascending) {
     _reverse(data, 0, len);
-  }
-}
-
-/// Internal sorting with known maximum bit length.
-void _radixSortPositiveBigIntWithKnownMax(
-  List<BigInt> list,
-  int start,
-  int end,
-  int maxBitLength, {
-  bool sortByAbsolute = false,
-}) {
-  final len = end - start;
-  if (len < _insertionSortThresholdBigint) {
-    _insertionSort(list, start, end, sortByAbsolute: sortByAbsolute);
-    return;
-  }
-
-  const bitsPerPass = 16;
-  const radixSize = 1 << bitsPerPass;
-  const mask = radixSize - 1;
-  final passes = (maxBitLength + bitsPerPass - 1) ~/ bitsPerPass;
-
-  var currentList = list;
-  var otherList = List<BigInt>.filled(len, BigInt.zero);
-  final count = Uint32List(radixSize);
-  var workingWithOriginal = true;
-
-  for (var pass = 0; pass < passes; ++pass) {
-    final shift = pass * bitsPerPass;
-    count.fillRange(0, radixSize, 0);
-
-    for (var i = 0; i < len; i++) {
-      final idx = workingWithOriginal ? start + i : i;
-      final n = currentList[idx];
-      final value = sortByAbsolute ? n.abs() : n;
-      final bucket = (value >> shift).toInt() & mask;
-      count[bucket]++;
-    }
-
-    for (var i = 1; i < radixSize; ++i) {
-      count[i] += count[i - 1];
-    }
-
-    for (var i = len - 1; i >= 0; --i) {
-      final idx = workingWithOriginal ? start + i : i;
-      final n = currentList[idx];
-      final value = sortByAbsolute ? n.abs() : n;
-      final bucket = (value >> shift).toInt() & mask;
-      otherList[--count[bucket]] = n;
-    }
-
-    final tempList = currentList;
-    currentList = otherList;
-
-    if (workingWithOriginal) {
-      otherList = List<BigInt>.filled(len, BigInt.zero);
-      workingWithOriginal = false;
-    } else {
-      otherList = tempList;
-    }
-  }
-
-  if (currentList != list) {
-    for (var i = 0; i < len; i++) {
-      list[start + i] = currentList[i];
-    }
   }
 }

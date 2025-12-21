@@ -35,9 +35,7 @@ void radixSortCore(Uint32List list, {bool reuseBuffer = true}) {
     final shift = pass * bitsPerPass;
 
     // Reset count array (faster than List.filled for reuse)
-    for (var i = 0; i < bucketCount; i++) {
-      count[i] = 0;
-    }
+    count.fillRange(0, bucketCount, 0);
 
     // 1. Count frequencies of each byte value
     // Check if we can skip this pass (optimization)
@@ -139,9 +137,7 @@ void radixSortCore64(Uint64List list, {bool reuseBuffer = true}) {
     final shift = pass * bitsPerPass;
 
     // Reset count array
-    for (var i = 0; i < bucketCount; i++) {
-      count[i] = 0;
-    }
+    count.fillRange(0, bucketCount, 0);
 
     // 1. Count frequencies of each byte value
     var minBucket = 255;

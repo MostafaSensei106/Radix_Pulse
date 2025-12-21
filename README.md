@@ -151,32 +151,81 @@ print(largeList.last); // 999999
 
 Performance is the core feature of Radix Plus. Our algorithms are consistently faster than the standard `List.sort()` for large numerical datasets, often by a significant margin.
 
-To ensure accuracy, the results below are the **average of 10 separate benchmark runs** on a standard development machine, each sorting a list of **1,000,000 random elements**.
+To ensure accuracy, the results below are the **average of 10 separate benchmark runs** on a standard development machine **AMD Ryzen™ 7 5800H**, each sorting a list of **1,000,000 random elements**.
 
-### Sorting `List<int>` (32-bit Signed Integers)
+## 🔹 Integers (`List<int>`)
 
-| Method             | Average Time (ms) | Speedup vs. `List.sort()` |
-| ------------------ | ----------------- | ------------------------- |
-| `List.sort()`      | ~1071             | 1.0x                      |
-| **`radixSortInt`** | **~312**          | **~3.4x faster**          |
-
-### Sorting `List<double>` (64-bit Doubles)
-
-| Method                | Average Time (ms) | Speedup vs. `List.sort()` |
-| --------------------- | ----------------- | ------------------------- |
-| `List.sort()`         | ~3623             | 1.0x                      |
-| **`radixSortDouble`** | **~916**          | **~4.0x faster**          |
-
-### Sorting `List<BigInt>`
-
-| Method                | Average Time (ms) | Speedup vs. `List.sort()` |
-| --------------------- | ----------------- | ------------------------- |
-| `List.sort()`         | ~9579             | 1.0x                      |
-| **`radixSortBigInt`** | **~1621**         | **~5.9x faster**          |
+| Method         | Average Time (ms) | Speedup vs. `List.sort()` |
+| -------------- | ----------------: | ------------------------: |
+| `List.sort()`  |             ~1628 |                      1.0x |
+| `radixSortInt` |              ~288 |          **~5.6x faster** |
 
 ---
 
-_Your results may vary based on hardware, data distribution, and list size. For more details on the methodology, see the [benchmark/results.md](./benchmark/results.md) file._
+## 🔹 Typed Lists (32-bit Integers)
+
+Typed lists (`Int32List`, `Uint32List`) achieve **even better performance** due to optimized memory layout.
+
+### 🔸 `Int32List`
+
+| Method           | Average Time (ms) | Speedup vs. `List.sort()` |
+| ---------------- | ----------------: | ------------------------: |
+| `List.sort()`    |             ~1347 |                      1.0x |
+| `radixSortInt32` |              ~210 |          **~6.4x faster** |
+
+### 🔸 `Uint32List`
+
+| Method            | Average Time (ms) | Speedup vs. `List.sort()` |
+| ----------------- | ----------------: | ------------------------: |
+| `List.sort()`     |             ~1344 |                      1.0x |
+| `radixSortUint32` |              ~191 |          **~7.0x faster** |
+
+---
+
+## 🔹 Floating Point Numbers
+
+Supports both `List<double>` and optimized `Float64List`, including **correct handling of `NaN` values**.
+
+### 🔸 `List<double>`
+
+| Method            | Average Time (ms) | Speedup vs. `List.sort()` |
+| ----------------- | ----------------: | ------------------------: |
+| `List.sort()`     |             ~2471 |                      1.0x |
+| `radixSortDouble` |              ~571 |          **~4.3x faster** |
+
+### 🔸 `Float64List`
+
+| Method                    | Average Time (ms) | Speedup vs. `List.sort()` |
+| ------------------------- | ----------------: | ------------------------: |
+| `List.sort()`             |             ~1493 |                      1.0x |
+| `radixSortFloat64`        |              ~387 |          **~3.9x faster** |
+| `radixSortFloat64WithNaN` |              ~311 |          **~4.8x faster** |
+
+---
+
+## 🔹 BigInt
+
+Efficient sorting for **arbitrary-precision integers**.
+
+| Method                     | Average Time (ms) | Speedup vs. `List.sort()` |
+| -------------------------- | ----------------: | ------------------------: |
+| `List.sort()`              |             ~6454 |                      1.0x |
+| `radixSortBigInt`          |             ~1092 |          **~5.9x faster** |
+| `radixSortBigIntWithRange` |             ~6654 |                **~0.97x** |
+
+> ℹ️ `radixSortBigIntWithRange` is optimized for **specific range-based scenarios**, not general-purpose sorting.
+
+---
+
+## ⚡ Parallel Sorting (Multi-threaded)
+
+Leverages **Dart Isolates** to unlock massive speedups on multi-core CPUs.
+
+| Method                       | Average Time (ms) | Speedup vs. `List.sort()` |
+| ---------------------------- | ----------------: | ------------------------: |
+| `List.sort()` (Standard int) |             ~1628 |                      1.0x |
+| `radixSortParallelUnsigned`  |               ~29 |         **~56.5x faster** |
+| `radixSortParallelSigned`    |               ~31 |         **~52.2x faster** |
 
 ---
 

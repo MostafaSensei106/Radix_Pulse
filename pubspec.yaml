@@ -7,12 +7,10 @@ topics: [sort, radix-sort, algorithm, flutter, dart]
 
 repository: https://github.com/MostafaSensei106/Radix_Plus
 homepage: https://github.com/MostafaSensei106/Radix_Plus
-# funding: [https://github.com/sponsors/MostafaSensei106]
 
 environment:
   sdk: ^3.10.1
 
-dependencies:
 
 dev_dependencies:
   benchmark_harness: ^2.3.1
